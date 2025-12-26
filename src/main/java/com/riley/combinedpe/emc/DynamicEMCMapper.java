@@ -19,9 +19,9 @@ import java.util.Map;
  *
  * Phase 2 implementation:
  * - Recipe scanner (crafting, smelting, smithing) ✓
- * - Tag-based inference (TODO: Phase 2.2)
+ * - Tag-based inference ✓
  * - Configuration overrides (TODO: Phase 2.3)
- * - EMC value registration with ProjectE
+ * - EMC value registration with ProjectE (TODO: Phase 2.4)
  */
 @EventBusSubscriber(modid = CombinedPE.MOD_ID)
 public class DynamicEMCMapper {
@@ -76,6 +76,8 @@ public class DynamicEMCMapper {
         int totalItems = 0;
         int itemsWithEMC = 0;
         int newEMCAssignments = 0;
+        int recipeBasedEMC = 0;
+        int tagBasedEMC = 0;
 
         long startTime = System.currentTimeMillis();
 
@@ -91,16 +93,30 @@ public class DynamicEMCMapper {
                 continue;
             }
 
-            // Calculate EMC from recipes
+            // Try to calculate EMC from recipes first
             double calculatedEMC = calculator.calculateEMC(stack);
 
             if (calculatedEMC > 0.0) {
-                // Store the calculated EMC (Phase 2.2 will register with ProjectE)
+                // Store recipe-based EMC
                 discoveredEMC.put(item, calculatedEMC);
                 newEMCAssignments++;
+                recipeBasedEMC++;
 
-                CombinedPE.LOGGER.info("Discovered EMC for {}: {} (will register as {})",
+                CombinedPE.LOGGER.info("Discovered EMC for {} from recipe: {} (will register as {})",
                     BuiltInRegistries.ITEM.getKey(item), calculatedEMC, Math.round(calculatedEMC));
+            } else {
+                // No recipe found, try tag-based inference
+                double inferredEMC = TagEMCInferrer.inferEMCFromTags(item);
+
+                if (inferredEMC > 0.0) {
+                    // Store tag-inferred EMC
+                    discoveredEMC.put(item, inferredEMC);
+                    newEMCAssignments++;
+                    tagBasedEMC++;
+
+                    CombinedPE.LOGGER.info("Inferred EMC for {} from tags: {} (will register as {})",
+                        BuiltInRegistries.ITEM.getKey(item), inferredEMC, Math.round(inferredEMC));
+                }
             }
         }
 
@@ -110,11 +126,13 @@ public class DynamicEMCMapper {
         CombinedPE.LOGGER.info("=== Dynamic EMC Scan Complete ===");
         CombinedPE.LOGGER.info("Total items scanned: {}", totalItems);
         CombinedPE.LOGGER.info("Items with existing EMC: {}", itemsWithEMC);
-        CombinedPE.LOGGER.info("New EMC values calculated: {}", newEMCAssignments);
+        CombinedPE.LOGGER.info("New EMC values discovered: {}", newEMCAssignments);
+        CombinedPE.LOGGER.info("  - From recipes: {}", recipeBasedEMC);
+        CombinedPE.LOGGER.info("  - From tags: {}", tagBasedEMC);
         CombinedPE.LOGGER.info("Scan duration: {}ms", duration);
 
-        // TODO: Phase 2.2 - Register calculated values with ProjectE
-        // TODO: Phase 2.3 - Generate report file
+        // TODO: Phase 2.4 - Register calculated values with ProjectE
+        // TODO: Phase 2.5 - Generate report file
     }
 
     /**
