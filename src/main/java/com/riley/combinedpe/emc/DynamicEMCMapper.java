@@ -46,7 +46,7 @@ public class DynamicEMCMapper {
 
     /**
      * Triggered when a level (world) loads
-     * This is when we scan and calculate EMC values
+     * This is when we scan and calculate EMC values (or load from cache)
      */
     @SubscribeEvent
     public static void onWorldLoad(LevelEvent.Load event) {
@@ -66,8 +66,34 @@ public class DynamicEMCMapper {
         }
 
         Level level = (Level) event.getLevel();
-        CombinedPE.LOGGER.info("World loaded, starting dynamic EMC calculation...");
 
+        // Check if force re-scan is enabled
+        boolean forceRescan = Config.FORCE_RESCAN.get();
+        if (forceRescan) {
+            CombinedPE.LOGGER.info("Force re-scan enabled, invalidating cache...");
+            EMCCache.invalidateCache();
+            // Reset the config option so it doesn't re-scan every time
+            // Note: Config values are read-only at runtime, user must manually set it back to false
+        }
+
+        // Try to load from cache first
+        if (!forceRescan && EMCCache.cacheExists()) {
+            CombinedPE.LOGGER.info("Loading EMC values from cache...");
+            Map<Item, Double> cachedEMC = EMCCache.loadFromCache();
+
+            if (cachedEMC != null && !cachedEMC.isEmpty()) {
+                discoveredEMC.clear();
+                discoveredEMC.putAll(cachedEMC);
+                CombinedPE.LOGGER.info("Successfully loaded {} EMC values from cache", cachedEMC.size());
+                // TODO: Phase 2.4 - Register cached values with ProjectE
+                return;
+            } else {
+                CombinedPE.LOGGER.warn("Cache load failed, performing full scan...");
+            }
+        }
+
+        // No cache or force re-scan: perform full scan
+        CombinedPE.LOGGER.info("World loaded, starting dynamic EMC calculation...");
         calculator = new RecipeEMCCalculator(level);
         scanAndCalculateEMC(level);
     }
@@ -169,6 +195,10 @@ public class DynamicEMCMapper {
         CombinedPE.LOGGER.info("  - From recipes: {}", recipeBasedEMC);
         CombinedPE.LOGGER.info("  - From tags: {}", tagBasedEMC);
         CombinedPE.LOGGER.info("Scan duration: {}ms", duration);
+
+        // Save to cache for next world load
+        CombinedPE.LOGGER.info("Saving EMC values to cache...");
+        EMCCache.saveToCache(discoveredEMC, emcSources);
 
         // Generate report if enabled
         if (Config.GENERATE_REPORT.get()) {

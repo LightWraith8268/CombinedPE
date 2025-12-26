@@ -18,6 +18,7 @@ public class Config {
     public static final ModConfigSpec.BooleanValue DYNAMIC_EMC_ENABLED;
     public static final ModConfigSpec.BooleanValue SCAN_ON_WORLD_LOAD;
     public static final ModConfigSpec.BooleanValue GENERATE_REPORT;
+    public static final ModConfigSpec.BooleanValue FORCE_RESCAN;
 
     // Inference Rules
     public static final ModConfigSpec.DoubleValue CRAFTING_MULTIPLIER;
@@ -42,6 +43,14 @@ public class Config {
         GENERATE_REPORT = BUILDER
                 .comment("Generate a report of assigned EMC values")
                 .define("generate_report", true);
+
+        FORCE_RESCAN = BUILDER
+                .comment(
+                    "Force a complete re-scan on next world load (ignores cache)",
+                    "After re-scan completes, this will automatically reset to false",
+                    "Use this to refresh EMC values after adding new mods or changing recipes"
+                )
+                .define("force_rescan", false);
 
         BUILDER.pop();
 
