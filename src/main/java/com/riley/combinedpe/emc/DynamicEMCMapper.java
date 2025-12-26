@@ -19,12 +19,13 @@ import java.util.Map;
 /**
  * Dynamic EMC mapper - scans and calculates EMC values for modded items
  *
- * Phase 2 implementation:
+ * Phase 2 implementation (COMPLETE):
  * - Recipe scanner (crafting, smelting, smithing) ✓
  * - Tag-based inference ✓
  * - Configuration overrides and blacklist ✓
  * - Report generation ✓
- * - EMC value registration with ProjectE (TODO: Phase 2.4)
+ * - EMC cache system (fast world loading) ✓
+ * - ProjectE registration (CombinedPEMapper via ServiceLoader) ✓
  */
 @EventBusSubscriber(modid = CombinedPE.MOD_ID)
 public class DynamicEMCMapper {
@@ -219,7 +220,9 @@ public class DynamicEMCMapper {
             EMCReportGenerator.generateReport(reportData);
         }
 
-        // TODO: Phase 2.4 - Register calculated values with ProjectE
+        // Note: EMC values are registered with ProjectE via CombinedPEMapper
+        // (ServiceLoader-based IEMCMapper registered in META-INF/services)
+        // ProjectE will call CombinedPEMapper.addMappings() during resource reload
     }
 
     /**
