@@ -32,6 +32,7 @@ public class DynamicEMCMapper {
 
     private static RecipeEMCCalculator calculator;
     private static final Map<Item, Double> discoveredEMC = new HashMap<>();
+    private static final Map<Item, String> emcSources = new HashMap<>();
 
     /**
      * Initialize the dynamic EMC system
@@ -68,25 +69,22 @@ public class DynamicEMCMapper {
 
         Level level = (Level) event.getLevel();
 
-        // Check if force re-scan is enabled
-        boolean forceRescan = Config.FORCE_RESCAN.get();
-        if (forceRescan) {
-            CombinedPE.LOGGER.info("Force re-scan enabled, invalidating cache...");
-            EMCCache.invalidateCache();
-            // Reset the config option so it doesn't re-scan every time
-            // Note: Config values are read-only at runtime, user must manually set it back to false
-        }
-
         // Try to load from cache first
-        if (!forceRescan && EMCCache.cacheExists()) {
+        if (EMCCache.cacheExists()) {
             CombinedPE.LOGGER.info("Loading EMC values from cache...");
             Map<Item, Double> cachedEMC = EMCCache.loadFromCache();
+            Map<Item, String> cachedSources = EMCCache.loadSourcesFromCache();
 
             if (cachedEMC != null && !cachedEMC.isEmpty()) {
                 discoveredEMC.clear();
                 discoveredEMC.putAll(cachedEMC);
+
+                emcSources.clear();
+                if (cachedSources != null) {
+                    emcSources.putAll(cachedSources);
+                }
+
                 CombinedPE.LOGGER.info("Successfully loaded {} EMC values from cache", cachedEMC.size());
-                // TODO: Phase 2.4 - Register cached values with ProjectE
                 return;
             } else {
                 CombinedPE.LOGGER.warn("Cache load failed, performing full scan...");
@@ -113,8 +111,10 @@ public class DynamicEMCMapper {
 
         long startTime = System.currentTimeMillis();
 
-        // Track EMC sources for report
-        Map<Item, String> emcSources = new HashMap<>();
+        // Clear previous sources
+        emcSources.clear();
+
+        // Track blacklisted items for report
         List<String> blacklistedItemIds = new ArrayList<>();
 
         // Load configuration overrides and blacklist
@@ -244,10 +244,18 @@ public class DynamicEMCMapper {
     }
 
     /**
+     * Get EMC sources (for determining override priority in ProjectE registration)
+     */
+    public static Map<Item, String> getEMCSources() {
+        return new HashMap<>(emcSources);
+    }
+
+    /**
      * Clear all calculated EMC values (for testing/reload)
      */
     public static void clearCache() {
         discoveredEMC.clear();
+        emcSources.clear();
         if (calculator != null) {
             calculator.clearCache();
         }

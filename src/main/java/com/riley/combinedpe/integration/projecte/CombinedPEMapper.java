@@ -21,11 +21,11 @@ import java.util.Map;
  *
  * Registration flow:
  * 1. ProjectE loads and calls addMappings() during resource reload
- * 2. We provide our calculated EMC values via setValueBefore()
+ * 2. We provide our calculated EMC values
+ *    - Config overrides use setValueAfter() to override even hardcoded ProjectE values
+ *    - Calculated values use setValueBefore() to fill gaps without overriding ProjectE
  * 3. ProjectE's graph algorithm incorporates our values
  * 4. Final EMC values become available in-game
- *
- * Priority: 0 (runs before ProjectE's own mappers, giving them higher priority)
  */
 public class CombinedPEMapper implements IEMCMapper<NormalizedSimpleStack, Long> {
 
@@ -50,13 +50,15 @@ public class CombinedPEMapper implements IEMCMapper<NormalizedSimpleStack, Long>
         ResourceManager resourceManager
     ) {
         Map<Item, Long> emcValues = DynamicEMCMapper.getDiscoveredEMCAsLong();
+        Map<Item, String> emcSources = DynamicEMCMapper.getEMCSources();
 
         if (emcValues == null || emcValues.isEmpty()) {
             CombinedPE.LOGGER.warn("CombinedPEMapper called but no EMC values available");
             return;
         }
 
-        int registeredCount = 0;
+        int overrideCount = 0;
+        int calculatedCount = 0;
 
         for (Map.Entry<Item, Long> entry : emcValues.entrySet()) {
             Item item = entry.getKey();
@@ -71,20 +73,27 @@ public class CombinedPEMapper implements IEMCMapper<NormalizedSimpleStack, Long>
                 // Create NormalizedSimpleStack from item
                 NormalizedSimpleStack nss = NSSItem.createItem(item);
 
-                // Register EMC value with ProjectE
-                // setValueBefore = suggests value before graph calculation
-                // ProjectE's graph algorithm will use this as input
-                collector.setValueBefore(nss, emcValue);
+                // Determine if this is a config override or calculated value
+                String source = emcSources.get(item);
+                boolean isOverride = "config_override".equals(source);
 
-                registeredCount++;
+                if (isOverride) {
+                    // Config overrides use setValueAfter to override even hardcoded ProjectE values
+                    collector.setValueAfter(nss, emcValue);
+                    overrideCount++;
+                } else {
+                    // Calculated values use setValueBefore to fill gaps without overriding ProjectE
+                    collector.setValueBefore(nss, emcValue);
+                    calculatedCount++;
+                }
 
             } catch (Exception e) {
                 CombinedPE.LOGGER.error("Failed to register EMC for item: {}", item, e);
             }
         }
 
-        CombinedPE.LOGGER.info("CombinedPEMapper registered {} EMC values with ProjectE",
-            registeredCount);
+        CombinedPE.LOGGER.info("CombinedPEMapper registered {} calculated EMC values and {} overrides with ProjectE",
+            calculatedCount, overrideCount);
     }
 
     /**
