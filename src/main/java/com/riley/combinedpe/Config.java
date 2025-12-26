@@ -73,8 +73,8 @@ public class Config {
                     "These values override both recipe-based and tag-based calculations"
                 )
                 .defineListAllowEmpty(
-                    Arrays.asList("overrides"),
-                    Arrays::asList,
+                    "overrides",
+                    () -> Arrays.asList(),
                     obj -> obj instanceof String
                 );
 
@@ -90,11 +90,12 @@ public class Config {
                     "  \"minecraft:bedrock\"",
                     "  \"minecraft:command_block\"",
                     "  \"minecraft:structure_block\"",
-                    "Blacklisted items will not be assigned EMC through any method"
+                    "Blacklisted items will not be assigned EMC through any method",
+                    "By default, no items are blacklisted - users can add items as needed"
                 )
                 .defineListAllowEmpty(
-                    Arrays.asList("items"),
-                    Arrays::asList,
+                    "items",
+                    () -> Arrays.asList(),
                     obj -> obj instanceof String
                 );
 
