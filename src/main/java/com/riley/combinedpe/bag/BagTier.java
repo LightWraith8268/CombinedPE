@@ -7,20 +7,24 @@ import net.minecraft.util.StringRepresentable;
  * Each tier has different capacity and module availability
  */
 public enum BagTier implements StringRepresentable {
-    BASIC("basic", 27, 0x8B4513),      // Brown
-    ADVANCED("advanced", 54, 0x4169E1),  // Royal Blue
-    SUPERIOR("superior", 81, 0x9370DB),  // Medium Purple
-    MASTERFUL("masterful", 108, 0xFFD700), // Gold
-    ULTIMATE("ultimate", 135, 0xFF1493); // Deep Pink
+    BASIC("basic", 54, 0x8B4513),      // Brown - 54 slots (6 rows)
+    ADVANCED("advanced", 108, 0x4169E1),  // Royal Blue - 108 slots (12 rows)
+    SUPERIOR("superior", 162, 0x9370DB),  // Medium Purple - 162 slots (18 rows)
+    MASTERFUL("masterful", 216, 0xFFD700), // Gold - 216 slots (24 rows)
+    ULTIMATE("ultimate", 270, 0xFF1493); // Deep Pink - 270 slots (30 rows)
 
     private final String name;
     private final int capacity;
     private final int color;
+    private final int stackMultiplier;
 
     BagTier(String name, int capacity, int color) {
         this.name = name;
         this.capacity = capacity;
         this.color = color;
+        // Stack multipliers for virtual stacking (exponential progression)
+        // Basic=1x, Advanced=4x, Superior=16x, Masterful=64x, Ultimate=256x
+        this.stackMultiplier = (int) Math.pow(4, this.ordinal());
     }
 
     /**
@@ -35,6 +39,22 @@ public enum BagTier implements StringRepresentable {
      */
     public int getColor() {
         return color;
+    }
+
+    /**
+     * Get the tier's stack multiplier for virtual stacking
+     * Basic=1x (64), Advanced=4x (256), Superior=16x (1024),
+     * Masterful=64x (4096), Ultimate=256x (16384)
+     */
+    public int getStackMultiplier() {
+        return stackMultiplier;
+    }
+
+    /**
+     * Get the maximum stack size for this tier (without upgrades)
+     */
+    public int getMaxStackSize() {
+        return 64 * stackMultiplier;
     }
 
     /**
