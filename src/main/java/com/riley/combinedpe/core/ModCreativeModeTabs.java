@@ -20,10 +20,14 @@ public class ModCreativeModeTabs {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> COMBINEDPE_TAB =
             CREATIVE_MODE_TABS.register("combinedpe", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.combinedpe"))
-                    .icon(() -> new ItemStack(Items.ENDER_PEARL)) // Placeholder, will change to Builder's Bag
+                    .icon(() -> new ItemStack(ModItems.ULTIMATE_BAG.get()))
                     .displayItems((parameters, output) -> {
-                        // Add items to creative tab
-                        // Will be populated as items are added
+                        // Builder's Bags (all tiers)
+                        output.accept(ModItems.BASIC_BAG.get());
+                        output.accept(ModItems.ADVANCED_BAG.get());
+                        output.accept(ModItems.SUPERIOR_BAG.get());
+                        output.accept(ModItems.MASTERFUL_BAG.get());
+                        output.accept(ModItems.ULTIMATE_BAG.get());
                     })
                     .build());
 }

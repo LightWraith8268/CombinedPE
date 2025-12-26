@@ -5,6 +5,7 @@ import com.riley.combinedpe.core.ModBlocks;
 import com.riley.combinedpe.core.ModCreativeModeTabs;
 import com.riley.combinedpe.core.ModItems;
 import com.riley.combinedpe.core.ModMenuTypes;
+import com.riley.combinedpe.registry.ModDataComponents;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -31,6 +32,7 @@ public class CombinedPE {
         ModItems.ITEMS.register(modEventBus);
         ModMenuTypes.MENU_TYPES.register(modEventBus);
         ModCreativeModeTabs.CREATIVE_MODE_TABS.register(modEventBus);
+        ModDataComponents.REGISTRAR.register(modEventBus);
 
         // Register the common setup method
         modEventBus.addListener(this::commonSetup);
