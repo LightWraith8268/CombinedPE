@@ -28,16 +28,17 @@ versionRange = "[${minecraft_version},1.22)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.combinedpe]]
-modId = "projecte"
-type = "required"
-versionRange = "[4.0.0,)"
-ordering = "AFTER"
-side = "BOTH"
+# Temporarily disabled until we have the JAR files
+# [[dependencies.combinedpe]]
+# modId = "projecte"
+# type = "required"
+# versionRange = "[4.0.0,)"
+# ordering = "AFTER"
+# side = "BOTH"
 
-[[dependencies.combinedpe]]
-modId = "projectex"
-type = "required"
-versionRange = "[5.0.0,)"
-ordering = "AFTER"
-side = "BOTH"
+# [[dependencies.combinedpe]]
+# modId = "projectex"
+# type = "required"
+# versionRange = "[5.0.0,)"
+# ordering = "AFTER"
+# side = "BOTH"
