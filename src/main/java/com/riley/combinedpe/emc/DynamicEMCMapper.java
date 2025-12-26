@@ -11,7 +11,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.level.LevelEvent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,8 +23,8 @@ import java.util.Map;
  * - Recipe scanner (crafting, smelting, smithing) ✓
  * - Tag-based inference ✓
  * - Configuration overrides and blacklist ✓
+ * - Report generation ✓
  * - EMC value registration with ProjectE (TODO: Phase 2.4)
- * - Report generation (TODO: Phase 2.5)
  */
 @EventBusSubscriber(modid = CombinedPE.MOD_ID)
 public class DynamicEMCMapper {
@@ -84,6 +86,10 @@ public class DynamicEMCMapper {
 
         long startTime = System.currentTimeMillis();
 
+        // Track EMC sources for report
+        Map<Item, String> emcSources = new HashMap<>();
+        List<String> blacklistedItemIds = new ArrayList<>();
+
         // Load configuration overrides and blacklist
         Map<String, Long> emcOverrides = Config.getEMCOverrides();
         CombinedPE.LOGGER.info("Loaded {} EMC overrides from config", emcOverrides.size());
@@ -98,6 +104,7 @@ public class DynamicEMCMapper {
             // Check blacklist first
             if (Config.isBlacklisted(itemId)) {
                 blacklistedItems++;
+                blacklistedItemIds.add(itemId);
                 CombinedPE.LOGGER.debug("Skipping blacklisted item: {}", itemId);
                 continue;
             }
@@ -112,6 +119,7 @@ public class DynamicEMCMapper {
             if (emcOverrides.containsKey(itemId)) {
                 long overrideValue = emcOverrides.get(itemId);
                 discoveredEMC.put(item, (double) overrideValue);
+                emcSources.put(item, "config_override");
                 newEMCAssignments++;
                 overriddenEMC++;
 
@@ -126,6 +134,7 @@ public class DynamicEMCMapper {
             if (calculatedEMC > 0.0) {
                 // Store recipe-based EMC
                 discoveredEMC.put(item, calculatedEMC);
+                emcSources.put(item, "recipe");
                 newEMCAssignments++;
                 recipeBasedEMC++;
 
@@ -138,6 +147,7 @@ public class DynamicEMCMapper {
                 if (inferredEMC > 0.0) {
                     // Store tag-inferred EMC
                     discoveredEMC.put(item, inferredEMC);
+                    emcSources.put(item, "tag_inference");
                     newEMCAssignments++;
                     tagBasedEMC++;
 
@@ -160,8 +170,26 @@ public class DynamicEMCMapper {
         CombinedPE.LOGGER.info("  - From tags: {}", tagBasedEMC);
         CombinedPE.LOGGER.info("Scan duration: {}ms", duration);
 
+        // Generate report if enabled
+        if (Config.GENERATE_REPORT.get()) {
+            EMCReportGenerator.ReportData reportData = new EMCReportGenerator.ReportData();
+            reportData.totalItems = totalItems;
+            reportData.itemsWithExistingEMC = itemsWithEMC;
+            reportData.blacklistedItems = blacklistedItems;
+            reportData.newEMCAssignments = newEMCAssignments;
+            reportData.overriddenEMC = overriddenEMC;
+            reportData.recipeBasedEMC = recipeBasedEMC;
+            reportData.tagBasedEMC = tagBasedEMC;
+            reportData.scanDurationMs = duration;
+            reportData.discoveredEMC = new HashMap<>(discoveredEMC);
+            reportData.configOverrides = emcOverrides;
+            reportData.blacklistedItemIds = blacklistedItemIds;
+            reportData.emcSources = emcSources;
+
+            EMCReportGenerator.generateReport(reportData);
+        }
+
         // TODO: Phase 2.4 - Register calculated values with ProjectE
-        // TODO: Phase 2.5 - Generate report file
     }
 
     /**
