@@ -36,8 +36,9 @@ public class RecipeEMCCalculator {
     // Track items currently being calculated (prevents infinite recursion)
     private final Set<ItemStack> calculationStack = new HashSet<>();
 
-    // Minimum EMC threshold (items below this get no EMC)
-    private static final double MIN_EMC_THRESHOLD = 0.1;
+    // Minimum EMC value for any calculated item
+    // Any item with calculated EMC < 1.0 gets rounded up to 1
+    private static final double MIN_EMC_VALUE = 1.0;
 
     public RecipeEMCCalculator(Level level) {
         this.level = level;
@@ -88,11 +89,11 @@ public class RecipeEMCCalculator {
                 emcValue = calculateFromSmithingRecipes(output);
             }
 
-            // Apply minimum threshold - items below threshold get 0 EMC
-            if (emcValue > 0.0 && emcValue < MIN_EMC_THRESHOLD) {
-                CombinedPE.LOGGER.debug("EMC for {} below threshold ({} < {}), setting to 0",
-                    output, emcValue, MIN_EMC_THRESHOLD);
-                emcValue = 0.0;
+            // Apply minimum EMC value - anything below 1.0 gets rounded to 1.0
+            if (emcValue > 0.0 && emcValue < MIN_EMC_VALUE) {
+                CombinedPE.LOGGER.debug("EMC for {} below minimum ({} < {}), rounding to {}",
+                    output, emcValue, MIN_EMC_VALUE, MIN_EMC_VALUE);
+                emcValue = MIN_EMC_VALUE;
             }
 
             // Cache the result
