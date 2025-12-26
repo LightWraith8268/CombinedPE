@@ -12,6 +12,12 @@ group = project.property("mod_group_id") as String
 repositories {
     mavenLocal()
     mavenCentral()
+
+    // Local libs directory for manually downloaded dependencies
+    flatDir {
+        dirs("libs")
+    }
+
     maven {
         name = "Moze Maven (ProjectE)"
         url = uri("https://maven.blamejared.com/")
@@ -67,20 +73,14 @@ sourceSets.main.get().resources.srcDir("src/generated/resources")
 dependencies {
     implementation("net.neoforged:neoforge:${project.property("neoforge_version")}")
 
-    // ProjectE, ProjectEX, and JEI dependencies temporarily disabled
-    // These mods are not available in public Maven repositories for NeoForge 1.21.1
-    // Will need to:
-    // 1. Download JARs manually from CurseForge
-    // 2. Place in libs/ directory
-    // 3. Use flatDir repository or local dependencies
+    // ProjectE - Local JAR file from libs/ directory
+    implementation(files("libs/ProjectE-1.21.1-PE1.1.0.jar"))
 
-    // TODO: Re-enable once we have the JAR files
-    // compileOnly("moze_intel.projecte:ProjectE:${project.property("projecte_version")}")
-    // runtimeOnly("moze_intel.projecte:ProjectE:${project.property("projecte_version")}")
-    // compileOnly("dev.ftb.mods:ftb-projectex:${project.property("projectex_version")}")
-    // runtimeOnly("dev.ftb.mods:ftb-projectex:${project.property("projectex_version")}")
-    // compileOnly("mezz.jei:jei-${project.property("minecraft_version")}-neoforge-api:${project.property("jei_version")}")
-    // runtimeOnly("mezz.jei:jei-${project.property("minecraft_version")}-neoforge:${project.property("jei_version")}")
+    // ProjectEX - Not available for 1.21.1 NeoForge yet
+    // See: https://github.com/FTBTeam/FTB-ProjectEX/issues/137
+    // Will add when released for 1.21.1
+
+    // JEI - Optional, will add later if needed
 }
 
 tasks.withType<ProcessResources> {
