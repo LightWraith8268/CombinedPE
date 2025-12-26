@@ -70,11 +70,21 @@ public class ItemBuildersBag extends Item {
         ItemStack stack = player.getItemInHand(hand);
 
         if (!level.isClientSide) {
-            // TODO: Open GUI when container system is implemented
-            player.displayClientMessage(
-                Component.literal("Builder's Bag (" + tier.getDisplayName() + ") - GUI coming soon!"),
-                true
-            );
+            // Open the bag GUI
+            player.openMenu(new net.minecraft.world.MenuProvider() {
+                @Override
+                public @org.jetbrains.annotations.NotNull Component getDisplayName() {
+                    return Component.literal(tier.getDisplayName() + " Builder's Bag");
+                }
+
+                @Override
+                public @org.jetbrains.annotations.NotNull net.minecraft.world.inventory.AbstractContainerMenu createMenu(
+                        int containerId,
+                        net.minecraft.world.entity.player.Inventory playerInventory,
+                        net.minecraft.world.entity.player.Player player) {
+                    return new BagMenu(containerId, playerInventory, stack);
+                }
+            }, buf -> ItemStack.STREAM_CODEC.encode(buf, stack)); // Send bag stack to client
         }
 
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
