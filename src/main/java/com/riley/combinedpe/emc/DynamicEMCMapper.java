@@ -20,8 +20,9 @@ import java.util.Map;
  * Phase 2 implementation:
  * - Recipe scanner (crafting, smelting, smithing) ✓
  * - Tag-based inference ✓
- * - Configuration overrides (TODO: Phase 2.3)
+ * - Configuration overrides and blacklist ✓
  * - EMC value registration with ProjectE (TODO: Phase 2.4)
+ * - Report generation (TODO: Phase 2.5)
  */
 @EventBusSubscriber(modid = CombinedPE.MOD_ID)
 public class DynamicEMCMapper {
@@ -78,14 +79,28 @@ public class DynamicEMCMapper {
         int newEMCAssignments = 0;
         int recipeBasedEMC = 0;
         int tagBasedEMC = 0;
+        int overriddenEMC = 0;
+        int blacklistedItems = 0;
 
         long startTime = System.currentTimeMillis();
+
+        // Load configuration overrides and blacklist
+        Map<String, Long> emcOverrides = Config.getEMCOverrides();
+        CombinedPE.LOGGER.info("Loaded {} EMC overrides from config", emcOverrides.size());
 
         // Iterate through all registered items
         for (Item item : BuiltInRegistries.ITEM) {
             totalItems++;
 
             ItemStack stack = new ItemStack(item);
+            String itemId = BuiltInRegistries.ITEM.getKey(item).toString();
+
+            // Check blacklist first
+            if (Config.isBlacklisted(itemId)) {
+                blacklistedItems++;
+                CombinedPE.LOGGER.debug("Skipping blacklisted item: {}", itemId);
+                continue;
+            }
 
             // Skip items that already have EMC
             if (ProjectECompat.hasEMC(stack)) {
@@ -93,7 +108,19 @@ public class DynamicEMCMapper {
                 continue;
             }
 
-            // Try to calculate EMC from recipes first
+            // Check for config override first (highest priority)
+            if (emcOverrides.containsKey(itemId)) {
+                long overrideValue = emcOverrides.get(itemId);
+                discoveredEMC.put(item, (double) overrideValue);
+                newEMCAssignments++;
+                overriddenEMC++;
+
+                CombinedPE.LOGGER.info("Applied EMC override for {}: {} (from config)",
+                    itemId, overrideValue);
+                continue;
+            }
+
+            // Try to calculate EMC from recipes
             double calculatedEMC = calculator.calculateEMC(stack);
 
             if (calculatedEMC > 0.0) {
@@ -103,7 +130,7 @@ public class DynamicEMCMapper {
                 recipeBasedEMC++;
 
                 CombinedPE.LOGGER.info("Discovered EMC for {} from recipe: {} (will register as {})",
-                    BuiltInRegistries.ITEM.getKey(item), calculatedEMC, Math.round(calculatedEMC));
+                    itemId, calculatedEMC, Math.round(calculatedEMC));
             } else {
                 // No recipe found, try tag-based inference
                 double inferredEMC = TagEMCInferrer.inferEMCFromTags(item);
@@ -115,7 +142,7 @@ public class DynamicEMCMapper {
                     tagBasedEMC++;
 
                     CombinedPE.LOGGER.info("Inferred EMC for {} from tags: {} (will register as {})",
-                        BuiltInRegistries.ITEM.getKey(item), inferredEMC, Math.round(inferredEMC));
+                        itemId, inferredEMC, Math.round(inferredEMC));
                 }
             }
         }
@@ -126,7 +153,9 @@ public class DynamicEMCMapper {
         CombinedPE.LOGGER.info("=== Dynamic EMC Scan Complete ===");
         CombinedPE.LOGGER.info("Total items scanned: {}", totalItems);
         CombinedPE.LOGGER.info("Items with existing EMC: {}", itemsWithEMC);
+        CombinedPE.LOGGER.info("Blacklisted items: {}", blacklistedItems);
         CombinedPE.LOGGER.info("New EMC values discovered: {}", newEMCAssignments);
+        CombinedPE.LOGGER.info("  - From config overrides: {}", overriddenEMC);
         CombinedPE.LOGGER.info("  - From recipes: {}", recipeBasedEMC);
         CombinedPE.LOGGER.info("  - From tags: {}", tagBasedEMC);
         CombinedPE.LOGGER.info("Scan duration: {}ms", duration);

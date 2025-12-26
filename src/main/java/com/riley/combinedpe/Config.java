@@ -2,6 +2,11 @@ package com.riley.combinedpe;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Configuration handler for CombinedPE
  */
@@ -18,6 +23,10 @@ public class Config {
     public static final ModConfigSpec.DoubleValue CRAFTING_MULTIPLIER;
     public static final ModConfigSpec.DoubleValue SMELTING_MULTIPLIER;
     public static final ModConfigSpec.DoubleValue SMITHING_MULTIPLIER;
+
+    // EMC Overrides and Blacklist
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> EMC_OVERRIDE_ENTRIES;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> BLACKLISTED_ITEMS;
 
     static {
         BUILDER.comment("Dynamic EMC Registration Settings").push("dynamic_registration");
@@ -51,7 +60,89 @@ public class Config {
                 .defineInRange("smithing_multiplier", 1.0, 0.1, 10.0);
 
         BUILDER.pop();
+
+        BUILDER.comment("EMC Value Overrides").push("emc_overrides");
+
+        EMC_OVERRIDE_ENTRIES = BUILDER
+                .comment(
+                    "Custom EMC values for specific items",
+                    "Format: \"modid:itemname=emc_value\"",
+                    "Examples:",
+                    "  \"minecraft:dirt=1\"",
+                    "  \"minecraft:diamond=8192\"",
+                    "These values override both recipe-based and tag-based calculations"
+                )
+                .defineListAllowEmpty(
+                    Arrays.asList("overrides"),
+                    Arrays::asList,
+                    obj -> obj instanceof String
+                );
+
+        BUILDER.pop();
+
+        BUILDER.comment("Blacklist Configuration").push("blacklist");
+
+        BLACKLISTED_ITEMS = BUILDER
+                .comment(
+                    "Items that should never receive EMC values",
+                    "Format: \"modid:itemname\"",
+                    "Examples:",
+                    "  \"minecraft:bedrock\"",
+                    "  \"minecraft:command_block\"",
+                    "  \"minecraft:structure_block\"",
+                    "Blacklisted items will not be assigned EMC through any method"
+                )
+                .defineListAllowEmpty(
+                    Arrays.asList("items"),
+                    Arrays::asList,
+                    obj -> obj instanceof String
+                );
+
+        BUILDER.pop();
     }
 
     public static final ModConfigSpec SPEC = BUILDER.build();
+
+    /**
+     * Parse EMC override entries into a map
+     * @return Map of item ID to EMC value
+     */
+    public static Map<String, Long> getEMCOverrides() {
+        Map<String, Long> overrides = new HashMap<>();
+
+        for (String entry : EMC_OVERRIDE_ENTRIES.get()) {
+            if (entry == null || entry.trim().isEmpty()) {
+                continue;
+            }
+
+            // Parse format: "modid:itemname=emc_value"
+            String[] parts = entry.split("=", 2);
+            if (parts.length != 2) {
+                CombinedPE.LOGGER.warn("Invalid EMC override format (expected 'item=value'): {}", entry);
+                continue;
+            }
+
+            String itemId = parts[0].trim();
+            String valueStr = parts[1].trim();
+
+            try {
+                long emcValue = Long.parseLong(valueStr);
+                overrides.put(itemId, emcValue);
+                CombinedPE.LOGGER.debug("Loaded EMC override: {} = {}", itemId, emcValue);
+            } catch (NumberFormatException e) {
+                CombinedPE.LOGGER.warn("Invalid EMC value for {}: {}", itemId, valueStr);
+            }
+        }
+
+        return overrides;
+    }
+
+    /**
+     * Check if an item is blacklisted
+     * @param itemId The item's resource location as string (e.g., "minecraft:dirt")
+     * @return true if the item should not receive EMC
+     */
+    public static boolean isBlacklisted(String itemId) {
+        return BLACKLISTED_ITEMS.get().contains(itemId);
+    }
 }
