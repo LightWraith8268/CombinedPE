@@ -30,11 +30,14 @@ public class RecipeEMCCalculator {
     private final RegistryAccess registryAccess;
     private final RecipeManager recipeManager;
 
-    // Cache calculated values to avoid recalculation
-    private final Map<ItemStack, Long> calculatedEMC = new HashMap<>();
+    // Cache calculated values to avoid recalculation (using double for fractional precision)
+    private final Map<ItemStack, Double> calculatedEMC = new HashMap<>();
 
     // Track items currently being calculated (prevents infinite recursion)
     private final Set<ItemStack> calculationStack = new HashSet<>();
+
+    // Minimum EMC threshold (items below this get no EMC)
+    private static final double MIN_EMC_THRESHOLD = 0.1;
 
     public RecipeEMCCalculator(Level level) {
         this.level = level;
@@ -45,9 +48,9 @@ public class RecipeEMCCalculator {
     /**
      * Calculate EMC for an item based on all available recipes
      * @param output The item to calculate EMC for
-     * @return Calculated EMC value, or 0 if no valid recipe found
+     * @return Calculated EMC value (double for fractional precision), or 0 if no valid recipe found
      */
-    public long calculateEMC(ItemStack output) {
+    public double calculateEMC(ItemStack output) {
         // Check cache first
         if (calculatedEMC.containsKey(output)) {
             return calculatedEMC.get(output);
@@ -56,12 +59,12 @@ public class RecipeEMCCalculator {
         // Check if already being calculated (prevent infinite recursion)
         if (calculationStack.contains(output)) {
             CombinedPE.LOGGER.warn("Circular recipe dependency detected for {}", output);
-            return 0;
+            return 0.0;
         }
 
         // If item already has EMC from ProjectE, use that
         if (ProjectECompat.hasEMC(output)) {
-            long existingEMC = ProjectECompat.getEMCValue(output);
+            double existingEMC = ProjectECompat.getEMCValue(output);
             calculatedEMC.put(output, existingEMC);
             return existingEMC;
         }
@@ -70,25 +73,32 @@ public class RecipeEMCCalculator {
 
         try {
             // Try different recipe types in order of preference
-            long emcValue = 0;
+            double emcValue = 0.0;
 
             // 1. Try crafting recipes first (most common)
             emcValue = calculateFromCraftingRecipes(output);
 
             // 2. If no crafting recipe, try smelting
-            if (emcValue == 0) {
+            if (emcValue == 0.0) {
                 emcValue = calculateFromSmeltingRecipes(output);
             }
 
             // 3. If no smelting recipe, try smithing
-            if (emcValue == 0) {
+            if (emcValue == 0.0) {
                 emcValue = calculateFromSmithingRecipes(output);
+            }
+
+            // Apply minimum threshold - items below threshold get 0 EMC
+            if (emcValue > 0.0 && emcValue < MIN_EMC_THRESHOLD) {
+                CombinedPE.LOGGER.debug("EMC for {} below threshold ({} < {}), setting to 0",
+                    output, emcValue, MIN_EMC_THRESHOLD);
+                emcValue = 0.0;
             }
 
             // Cache the result
             calculatedEMC.put(output, emcValue);
 
-            if (emcValue > 0) {
+            if (emcValue > 0.0) {
                 CombinedPE.LOGGER.debug("Calculated EMC for {}: {}", output, emcValue);
             }
 
@@ -100,9 +110,17 @@ public class RecipeEMCCalculator {
     }
 
     /**
+     * Get EMC value as long (for ProjectE API compatibility)
+     * Rounds the double value to nearest long
+     */
+    public long calculateEMCAsLong(ItemStack output) {
+        return Math.round(calculateEMC(output));
+    }
+
+    /**
      * Calculate EMC from crafting recipes (shaped and shapeless)
      */
-    private long calculateFromCraftingRecipes(ItemStack output) {
+    private double calculateFromCraftingRecipes(ItemStack output) {
         List<RecipeHolder<CraftingRecipe>> recipes = recipeManager
             .getAllRecipesFor(RecipeType.CRAFTING);
 
@@ -112,25 +130,25 @@ public class RecipeEMCCalculator {
 
             // Check if this recipe produces our target item
             if (ItemStack.isSameItemSameComponents(result, output)) {
-                long ingredientEMC = calculateIngredientEMC(recipe.getIngredients());
+                double ingredientEMC = calculateIngredientEMC(recipe.getIngredients());
 
-                if (ingredientEMC > 0) {
+                if (ingredientEMC > 0.0) {
                     int outputCount = result.getCount();
                     double multiplier = Config.CRAFTING_MULTIPLIER.get();
 
-                    long emcPerItem = (long) ((ingredientEMC * multiplier) / outputCount);
+                    double emcPerItem = (ingredientEMC * multiplier) / outputCount;
                     return emcPerItem;
                 }
             }
         }
 
-        return 0;
+        return 0.0;
     }
 
     /**
      * Calculate EMC from smelting recipes (furnace, blast furnace, smoker)
      */
-    private long calculateFromSmeltingRecipes(ItemStack output) {
+    private double calculateFromSmeltingRecipes(ItemStack output) {
         // Check all smelting recipe types
         RecipeType<?>[] smeltingTypes = {
             RecipeType.SMELTING,
@@ -139,17 +157,17 @@ public class RecipeEMCCalculator {
         };
 
         for (RecipeType<?> recipeType : smeltingTypes) {
-            long emcValue = calculateFromSmeltingType(output, (RecipeType<SmeltingRecipe>) recipeType);
-            if (emcValue > 0) {
+            double emcValue = calculateFromSmeltingType(output, (RecipeType<SmeltingRecipe>) recipeType);
+            if (emcValue > 0.0) {
                 return emcValue;
             }
         }
 
-        return 0;
+        return 0.0;
     }
 
     @SuppressWarnings("unchecked")
-    private long calculateFromSmeltingType(ItemStack output, RecipeType<SmeltingRecipe> recipeType) {
+    private double calculateFromSmeltingType(ItemStack output, RecipeType<SmeltingRecipe> recipeType) {
         List<RecipeHolder<SmeltingRecipe>> recipes = (List<RecipeHolder<SmeltingRecipe>>) (List<?>)
             recipeManager.getAllRecipesFor(recipeType);
 
@@ -158,25 +176,25 @@ public class RecipeEMCCalculator {
             ItemStack result = recipe.getResultItem(registryAccess);
 
             if (ItemStack.isSameItemSameComponents(result, output)) {
-                long ingredientEMC = calculateIngredientEMC(recipe.getIngredients());
+                double ingredientEMC = calculateIngredientEMC(recipe.getIngredients());
 
-                if (ingredientEMC > 0) {
+                if (ingredientEMC > 0.0) {
                     int outputCount = result.getCount();
                     double multiplier = Config.SMELTING_MULTIPLIER.get();
 
-                    long emcPerItem = (long) ((ingredientEMC * multiplier) / outputCount);
+                    double emcPerItem = (ingredientEMC * multiplier) / outputCount;
                     return emcPerItem;
                 }
             }
         }
 
-        return 0;
+        return 0.0;
     }
 
     /**
      * Calculate EMC from smithing recipes
      */
-    private long calculateFromSmithingRecipes(ItemStack output) {
+    private double calculateFromSmithingRecipes(ItemStack output) {
         List<RecipeHolder<SmithingRecipe>> recipes = recipeManager
             .getAllRecipesFor(RecipeType.SMITHING);
 
@@ -185,27 +203,27 @@ public class RecipeEMCCalculator {
             ItemStack result = recipe.getResultItem(registryAccess);
 
             if (ItemStack.isSameItemSameComponents(result, output)) {
-                long ingredientEMC = calculateIngredientEMC(recipe.getIngredients());
+                double ingredientEMC = calculateIngredientEMC(recipe.getIngredients());
 
-                if (ingredientEMC > 0) {
+                if (ingredientEMC > 0.0) {
                     int outputCount = result.getCount();
                     // Use crafting multiplier for smithing (no separate config yet)
                     double multiplier = Config.CRAFTING_MULTIPLIER.get();
 
-                    long emcPerItem = (long) ((ingredientEMC * multiplier) / outputCount);
+                    double emcPerItem = (ingredientEMC * multiplier) / outputCount;
                     return emcPerItem;
                 }
             }
         }
 
-        return 0;
+        return 0.0;
     }
 
     /**
      * Calculate total EMC of recipe ingredients
      */
-    private long calculateIngredientEMC(List<Ingredient> ingredients) {
-        long totalEMC = 0;
+    private double calculateIngredientEMC(List<Ingredient> ingredients) {
+        double totalEMC = 0.0;
 
         for (Ingredient ingredient : ingredients) {
             // Get the first matching item from the ingredient
@@ -220,7 +238,7 @@ public class RecipeEMCCalculator {
             ItemStack ingredientStack = matchingStacks[0];
 
             // Get EMC for this ingredient (may trigger recursive calculation)
-            long ingredientEMC = 0;
+            double ingredientEMC = 0.0;
 
             if (ProjectECompat.hasEMC(ingredientStack)) {
                 // Item already has EMC from ProjectE
@@ -231,8 +249,8 @@ public class RecipeEMCCalculator {
             }
 
             // If any ingredient has no EMC, recipe is invalid
-            if (ingredientEMC == 0) {
-                return 0;
+            if (ingredientEMC == 0.0) {
+                return 0.0;
             }
 
             totalEMC += ingredientEMC * ingredientStack.getCount();
@@ -250,9 +268,9 @@ public class RecipeEMCCalculator {
     }
 
     /**
-     * Get all calculated EMC values
+     * Get all calculated EMC values (as doubles for precision)
      */
-    public Map<ItemStack, Long> getCalculatedEMC() {
+    public Map<ItemStack, Double> getCalculatedEMC() {
         return new HashMap<>(calculatedEMC);
     }
 }

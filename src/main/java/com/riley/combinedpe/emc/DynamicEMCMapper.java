@@ -27,7 +27,7 @@ import java.util.Map;
 public class DynamicEMCMapper {
 
     private static RecipeEMCCalculator calculator;
-    private static final Map<Item, Long> discoveredEMC = new HashMap<>();
+    private static final Map<Item, Double> discoveredEMC = new HashMap<>();
 
     /**
      * Initialize the dynamic EMC system
@@ -92,15 +92,15 @@ public class DynamicEMCMapper {
             }
 
             // Calculate EMC from recipes
-            long calculatedEMC = calculator.calculateEMC(stack);
+            double calculatedEMC = calculator.calculateEMC(stack);
 
-            if (calculatedEMC > 0) {
+            if (calculatedEMC > 0.0) {
                 // Store the calculated EMC (Phase 2.2 will register with ProjectE)
                 discoveredEMC.put(item, calculatedEMC);
                 newEMCAssignments++;
 
-                CombinedPE.LOGGER.info("Discovered EMC for {}: {}",
-                    BuiltInRegistries.ITEM.getKey(item), calculatedEMC);
+                CombinedPE.LOGGER.info("Discovered EMC for {}: {} (will register as {})",
+                    BuiltInRegistries.ITEM.getKey(item), calculatedEMC, Math.round(calculatedEMC));
             }
         }
 
@@ -118,10 +118,21 @@ public class DynamicEMCMapper {
     }
 
     /**
-     * Get all discovered EMC values
+     * Get all discovered EMC values (as doubles for fractional precision)
      */
-    public static Map<Item, Long> getDiscoveredEMC() {
+    public static Map<Item, Double> getDiscoveredEMC() {
         return new HashMap<>(discoveredEMC);
+    }
+
+    /**
+     * Get all discovered EMC values rounded to long (for ProjectE registration)
+     */
+    public static Map<Item, Long> getDiscoveredEMCAsLong() {
+        Map<Item, Long> rounded = new HashMap<>();
+        for (Map.Entry<Item, Double> entry : discoveredEMC.entrySet()) {
+            rounded.put(entry.getKey(), Math.round(entry.getValue()));
+        }
+        return rounded;
     }
 
     /**
