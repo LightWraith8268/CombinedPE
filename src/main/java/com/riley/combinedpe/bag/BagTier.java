@@ -7,11 +7,11 @@ import net.minecraft.util.StringRepresentable;
  * Each tier has different capacity and module availability
  */
 public enum BagTier implements StringRepresentable {
-    BASIC("basic", 54, 0x8B4513),      // Brown - 54 slots (6 rows)
-    ADVANCED("advanced", 108, 0x4169E1),  // Royal Blue - 108 slots (12 rows)
-    SUPERIOR("superior", 162, 0x9370DB),  // Medium Purple - 162 slots (18 rows)
-    MASTERFUL("masterful", 216, 0xFFD700), // Gold - 216 slots (24 rows)
-    ULTIMATE("ultimate", 270, 0xFF1493); // Deep Pink - 270 slots (30 rows)
+    BASIC("basic", 108, 0x8B4513),      // Brown - 108 slots (6 rows × 18)
+    ADVANCED("advanced", 216, 0x4169E1),  // Royal Blue - 216 slots (12 rows × 18)
+    SUPERIOR("superior", 432, 0x9370DB),  // Medium Purple - 432 slots (24 rows × 18)
+    MASTERFUL("masterful", 864, 0xFFD700), // Gold - 864 slots (48 rows × 18)
+    ULTIMATE("ultimate", 1728, 0xFF1493); // Deep Pink - 1,728 slots (96 rows × 18)
 
     private final String name;
     private final int capacity;

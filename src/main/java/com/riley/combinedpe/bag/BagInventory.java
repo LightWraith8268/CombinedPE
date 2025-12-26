@@ -104,13 +104,29 @@ public record BagInventory(NonNullList<ItemStack> items) {
 
     /**
      * Get the total number of items in the inventory
+     * Uses long to prevent overflow with large bags (Ultimate can hold 450M+ items)
      */
-    public int getTotalItemCount() {
-        int count = 0;
+    public long getTotalItemCount() {
+        long count = 0;
         for (ItemStack stack : items) {
             count += stack.getCount();
         }
         return count;
+    }
+
+    /**
+     * Get a formatted string for large item counts (e.g., "28.3M" instead of "28311552")
+     */
+    public static String formatItemCount(long count) {
+        if (count < 1000) {
+            return String.valueOf(count);
+        } else if (count < 1_000_000) {
+            return String.format("%.1fK", count / 1000.0);
+        } else if (count < 1_000_000_000) {
+            return String.format("%.1fM", count / 1_000_000.0);
+        } else {
+            return String.format("%.1fB", count / 1_000_000_000.0);
+        }
     }
 
     /**

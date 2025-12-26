@@ -93,9 +93,10 @@ public class ItemBuildersBag extends Item {
 
         // Capacity info
         BagInventory inventory = getInventory(stack);
-        int itemCount = inventory.getTotalItemCount();
+        long itemCount = inventory.getTotalItemCount();
+        String formattedCount = BagInventory.formatItemCount(itemCount);
         tooltipComponents.add(Component.literal(
-            String.format("Capacity: %d slots (%d items)", tier.getCapacity(), itemCount)
+            String.format("Capacity: %d slots (%s items)", tier.getCapacity(), formattedCount)
         ));
 
         // Module info
