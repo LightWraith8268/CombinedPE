@@ -1,6 +1,39 @@
 # Claude Code configuration
 .claude/
 
-# Markdown files except README.md
+# Beads configuration
+.beads/
+
+# Markdown files except README.md, CHANGELOG.md, and PLAN.md
 *.md
 !README.md
+!CHANGELOG.md
+!PLAN.md
+
+# Gradle
+.gradle/
+build/
+run/
+out/
+logs/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Generated resources
+src/generated/

@@ -1,0 +1,14 @@
+{
+  "itemGroup.combinedpe": "CombinedPE",
+
+  "_comment": "Configuration",
+  "config.combinedpe.title": "CombinedPE Configuration",
+  "config.combinedpe.dynamic_registration": "Dynamic EMC Registration",
+  "config.combinedpe.dynamic_registration.enabled": "Enable Dynamic EMC",
+  "config.combinedpe.dynamic_registration.scan_on_world_load": "Scan on World Load",
+  "config.combinedpe.dynamic_registration.generate_report": "Generate Report",
+  "config.combinedpe.inference_rules": "Inference Rules",
+  "config.combinedpe.inference_rules.crafting_multiplier": "Crafting Multiplier",
+  "config.combinedpe.inference_rules.smelting_multiplier": "Smelting Multiplier",
+  "config.combinedpe.inference_rules.smithing_multiplier": "Smithing Multiplier"
+}

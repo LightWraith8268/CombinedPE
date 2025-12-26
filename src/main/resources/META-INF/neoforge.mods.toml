@@ -1,0 +1,43 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "${mod_license}"
+showAsResourcePack = false
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+updateJSONURL = ""
+displayURL = ""
+logoFile = ""
+credits = ""
+authors = "${mod_authors}"
+description = '''${mod_description}'''
+
+[[dependencies.combinedpe]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${neoforge_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.combinedpe]]
+modId = "minecraft"
+type = "required"
+versionRange = "[${minecraft_version},1.22)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.combinedpe]]
+modId = "projecte"
+type = "required"
+versionRange = "[4.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.combinedpe]]
+modId = "projectex"
+type = "required"
+versionRange = "[5.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
