@@ -7,7 +7,7 @@ This package contains integration code for Refined Storage 2.0, allowing players
 ## Current Status
 
 **Implementation:** ✅ ENABLED
-**Version:** 1.7.2
+**Version:** 1.7.4
 
 ## How It Works
 
@@ -20,10 +20,14 @@ When an RS External Storage block is placed and connected to a Refined Storage n
    - Item's EMC value
    - Player's current EMC balance
    - Formula: `quantity = playerEMC / itemEMC`
-5. **Extraction**: When RS extracts items:
+5. **Extraction (Transmutation)**: When RS extracts items:
    - Deducts EMC cost from player's balance
    - Returns the transmuted items
-6. **Read-Only**: Inserting items into the EMC storage is blocked
+6. **Insertion (EMC Conversion)**: When RS inserts items:
+   - Converts items to EMC value
+   - Adds EMC to player's balance
+   - Learns the item if not already known
+   - Only accepts items with EMC values
 
 ## Usage
 
@@ -38,7 +42,7 @@ When an RS External Storage block is placed and connected to a Refined Storage n
 
 **Result:** You'll see ALL your learned ProjectE items with quantities based on your EMC!
 
-### Example:
+### Example - Extraction (Transmutation):
 
 - **Player EMC:** 1,000,000
 - **Learned Items:**
@@ -47,7 +51,18 @@ When an RS External Storage block is placed and connected to a Refined Storage n
   - Iron Ingot (256 EMC) → Shows 3,906 available
   - Diamond (8,192 EMC) → Shows 122 available
 
-As you extract items, your EMC decreases and quantities update in real-time!
+Extract 100 Iron Ingots → EMC decreases by 25,600
+
+### Example - Insertion (EMC Conversion):
+
+- **Player EMC:** 10,000
+- Insert 64 Diamonds (8,192 EMC each) into RS
+- RS routes to External Storage (if priority is high)
+- Diamonds convert to EMC: 64 × 8,192 = 524,288 EMC
+- **New Player EMC:** 534,288
+- Diamond is learned (if not already known)
+
+**Pro Tip:** Set External Storage priority higher than regular storage to auto-convert items to EMC!
 
 ## Files
 
@@ -57,15 +72,22 @@ As you extract items, your EMC decreases and quantities update in real-time!
 
 ## Design Notes
 
-### Full Item Listing
+### Bidirectional EMC Flow
 
-The iterator returns ALL learned items with their calculated quantities:
-- Iterates through player's ProjectE knowledge (`IKnowledgeProvider.getKnowledge()`)
-- Filters items that have EMC values
+**Extraction (EMC → Items):**
+- Iterator returns ALL learned items with calculated quantities
+- Iterates through player's ProjectE knowledge
 - Calculates max quantity per item: `playerEMC / itemEMC`
-- Returns as `ResourceAmount` list for RS Grid display
+- Deducts EMC when items are extracted
 
-This provides a complete view of available EMC transmutations directly in RS!
+**Insertion (Items → EMC):**
+- Accepts any item with an EMC value
+- Converts items to EMC: `itemCount × itemEMC`
+- Adds EMC to player's balance
+- Auto-learns unknown items
+- Rejects items without EMC values
+
+This allows RS to act as both a transmutation interface AND an EMC bank!
 
 ### Player Association
 

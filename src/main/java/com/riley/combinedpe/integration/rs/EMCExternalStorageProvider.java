@@ -23,17 +23,18 @@ import java.util.List;
  * RS External Storage provider for ProjectE EMC access.
  *
  * When attached to a block (typically near a Transmutation Table), this provider
- * allows Refined Storage to see and extract items using the nearest player's EMC.
+ * allows Refined Storage to bidirectionally interact with the nearest player's EMC.
  *
  * Design approach:
  * - Finds nearest player within 16 blocks
  * - Uses that player's ProjectE knowledge and EMC balance
  * - Lists ALL learned items in RS Grid with quantities based on available EMC
- * - On extract: deducts EMC cost from player's balance
- * - On insert: rejected (EMC is read-only from RS perspective)
+ * - On extract: deducts EMC cost from player's balance (transmutation)
+ * - On insert: converts items to EMC and learns them if unknown
  *
- * This provides full EMC integration - all learned items visible in RS Grid with
- * real-time quantity calculation based on player's current EMC balance.
+ * This provides full EMC integration - transmute items from EMC or convert items
+ * to EMC, all through the RS Grid interface. Set External Storage priority high
+ * to prefer EMC conversion over regular storage.
  */
 public class EMCExternalStorageProvider implements ExternalStorageProvider {
 
@@ -158,9 +159,56 @@ public class EMCExternalStorageProvider implements ExternalStorageProvider {
                       long amount,
                       com.refinedmods.refinedstorage.api.core.Action action,
                       com.refinedmods.refinedstorage.api.storage.Actor actor) {
-        // EMC storage is read-only from RS perspective
-        // Players cannot "insert" items into their EMC pool via RS
-        return 0;
+        ServerPlayer player = findNearestPlayer();
+        if (player == null) {
+            return 0;
+        }
+
+        IKnowledgeProvider knowledge = getKnowledge(player);
+        if (knowledge == null) {
+            return 0;
+        }
+
+        // Resource should be an ItemResource
+        if (!(resource instanceof ItemResource itemResource)) {
+            return 0;
+        }
+
+        // Convert to ItemStack
+        ItemStack stack = itemResource.toItemStack();
+        if (stack.isEmpty()) {
+            return 0;
+        }
+
+        // Check if item has EMC value
+        if (!ProjectECompat.hasEMC(stack)) {
+            return 0; // Can't convert items without EMC
+        }
+
+        // Limit to int range for safety
+        long toInsert = Math.min(amount, Integer.MAX_VALUE);
+
+        if (action == com.refinedmods.refinedstorage.api.core.Action.EXECUTE) {
+            // Convert items to EMC
+            long emcPerItem = ProjectECompat.getEMCValue(stack);
+            long totalEMCGained = emcPerItem * toInsert;
+
+            // Add EMC to player
+            BigInteger currentEMC = knowledge.getEmc();
+            BigInteger newEMC = currentEMC.add(BigInteger.valueOf(totalEMCGained));
+            knowledge.setEmc(newEMC);
+            knowledge.syncEmc(player);
+
+            // Learn the item if not already known
+            ItemInfo itemInfo = ItemInfo.fromStack(stack);
+            if (!knowledge.hasKnowledge(itemInfo)) {
+                knowledge.addKnowledge(itemInfo);
+                knowledge.syncKnowledgeChange(player, itemInfo, true);
+            }
+        }
+
+        // Successfully "inserted" (converted to EMC)
+        return toInsert;
     }
 
     @Override
