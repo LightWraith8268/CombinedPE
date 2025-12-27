@@ -2,6 +2,7 @@ package com.riley.combinedpe.client;
 
 import com.riley.combinedpe.bag.BagScreen;
 import com.riley.combinedpe.core.ModMenuTypes;
+import com.riley.combinedpe.workbench.EnhancedWorkbenchScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -20,6 +21,7 @@ public class ClientSetup {
     @SubscribeEvent
     public static void onRegisterScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.BAG_MENU.get(), BagScreen::new);
+        event.register(ModMenuTypes.ENHANCED_WORKBENCH.get(), EnhancedWorkbenchScreen::new);
     }
 
     @SubscribeEvent
