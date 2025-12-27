@@ -189,4 +189,10 @@ public class ModItems {
     public static final DeferredHolder<Item, ItemStackUpgrade> STACK_UPGRADE_IV =
         ITEMS.register("stack_upgrade_iv", () -> new ItemStackUpgrade(StackUpgradeTier.TIER_IV, new Item.Properties()));
 
+    // Enhanced Workbench block item
+    public static final DeferredHolder<Item, net.minecraft.world.item.BlockItem> ENHANCED_WORKBENCH =
+        ITEMS.register("enhanced_workbench", () -> new net.minecraft.world.item.BlockItem(
+            ModBlocks.ENHANCED_WORKBENCH.get(), new Item.Properties()
+        ));
+
 }

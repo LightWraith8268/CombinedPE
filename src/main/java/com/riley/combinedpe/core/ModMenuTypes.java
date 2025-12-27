@@ -2,6 +2,7 @@ package com.riley.combinedpe.core;
 
 import com.riley.combinedpe.CombinedPE;
 import com.riley.combinedpe.bag.BagMenu;
+import com.riley.combinedpe.workbench.EnhancedWorkbenchMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
@@ -26,4 +27,11 @@ public class ModMenuTypes {
                         var bagStack = net.minecraft.world.item.ItemStack.STREAM_CODEC.decode(data);
                         return new BagMenu(containerId, playerInventory, bagStack);
                     }));
+
+    /**
+     * Menu type for Enhanced Workbench GUI
+     */
+    public static final DeferredHolder<MenuType<?>, MenuType<EnhancedWorkbenchMenu>> ENHANCED_WORKBENCH =
+            MENU_TYPES.register("enhanced_workbench",
+                    () -> IMenuTypeExtension.create(EnhancedWorkbenchMenu::new));
 }
