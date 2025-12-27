@@ -44,9 +44,15 @@ public class RefinedStorageIntegration {
             return;
         }
 
-        CombinedPE.LOGGER.info("Refined Storage detected, initializing EMC External Storage integration");
+        CombinedPE.LOGGER.info("Refined Storage detected, initializing RS integration...");
 
         try {
+            // TEMPORARY DISABLE: RS integration disabled to diagnose world hanging
+            // TODO: Re-enable after identifying root cause
+            CombinedPE.LOGGER.warn("RS integration DISABLED temporarily to prevent world hanging");
+            CombinedPE.LOGGER.warn("This is a diagnostic step - integration will be re-enabled once bug is identified");
+
+            /*
             com.refinedmods.refinedstorage.common.api.RefinedStorageApi api =
                 com.refinedmods.refinedstorage.common.api.RefinedStorageApi.INSTANCE;
 
@@ -63,6 +69,7 @@ public class RefinedStorageIntegration {
             CombinedPE.LOGGER.info("RS EMC External Storage integration registered successfully");
             CombinedPE.LOGGER.info("RS Builder's Bag External Storage integration registered successfully");
             CombinedPE.LOGGER.info("Place RS External Storage near you to access EMC transmutation and bag inventory");
+            */
         } catch (Exception e) {
             CombinedPE.LOGGER.error("Failed to register RS integration", e);
         }
