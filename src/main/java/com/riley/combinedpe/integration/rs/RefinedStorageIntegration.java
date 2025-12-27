@@ -47,15 +47,13 @@ public class RefinedStorageIntegration {
         CombinedPE.LOGGER.info("Refined Storage detected, initializing EMC External Storage integration");
 
         try {
-            // TODO: Uncomment when RS dependency is added
-            /*
-            RefinedStorageApi api = RefinedStorageApi.INSTANCE;
+            com.refinedmods.refinedstorage.common.api.RefinedStorageApi api =
+                com.refinedmods.refinedstorage.common.api.RefinedStorageApi.INSTANCE;
 
             api.addExternalStorageProviderFactory((level, pos, direction) -> {
                 // Create EMC External Storage provider for this position
                 return new EMCExternalStorageProvider(level, pos);
             });
-            */
 
             CombinedPE.LOGGER.info("RS EMC External Storage integration registered successfully");
             CombinedPE.LOGGER.info("Place RS External Storage near you to access EMC transmutation");

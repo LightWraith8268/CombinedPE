@@ -76,6 +76,9 @@ dependencies {
     // ProjectE - Local JAR file from libs/ directory
     implementation(files("libs/ProjectE-1.21.1-PE1.1.0.jar"))
 
+    // Refined Storage 2.0 - Optional integration, compileOnly for lightweight build
+    compileOnly(files("libs/refinedstorage-neoforge-2.0.0.jar"))
+
     // ProjectEX - Not available for 1.21.1 NeoForge yet
     // See: https://github.com/FTBTeam/FTB-ProjectEX/issues/137
     // Will add when released for 1.21.1
