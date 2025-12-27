@@ -13,19 +13,19 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 /**
- * Builder's Bag item - provides intelligent block storage and supply for building
+ * Specialized bag item - type-specific storage with advanced features
  *
- * Features (tier-dependent):
- * - Supplier Module: Automatically provides blocks when building
- * - Container Module: Pulls blocks from external storage
- * - Crafting Module: Auto-crafts items when needed
- * - EMC Provider Module: Uses ProjectE EMC for block provision
+ * 13 bag types (Materials, Food, Ore, Tool, Mob Drop, Liquid, Redstone, Potion, Enchanting, Trade, Combat, Adventure, Treasure)
+ * 5 tiers each (Basic, Advanced, Superior, Masterful, Ultimate)
+ *
+ * Features vary by type and tier - see BagType for details
  */
 public class ItemBuildersBag extends Item {
 
     private final BagTier tier;
+    private final BagType type;
 
-    public ItemBuildersBag(BagTier tier, Properties properties) {
+    public ItemBuildersBag(BagType type, BagTier tier, Properties properties) {
         super(properties
             .stacksTo(1) // Bags don't stack
             .component(ModDataComponents.BAG_INVENTORY.get(), BagInventory.empty(tier.getCapacity()))
@@ -33,6 +33,7 @@ public class ItemBuildersBag extends Item {
             .component(ModDataComponents.STACK_UPGRADE.get(), StackUpgradeTier.NONE)
         );
         this.tier = tier;
+        this.type = type;
     }
 
     /**
@@ -40,6 +41,13 @@ public class ItemBuildersBag extends Item {
      */
     public BagTier getTier() {
         return tier;
+    }
+
+    /**
+     * Get the type of this bag
+     */
+    public BagType getType() {
+        return type;
     }
 
     /**
@@ -108,6 +116,14 @@ public class ItemBuildersBag extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+
+        // Type info
+        tooltipComponents.add(Component.literal(type.getDisplayName() + " Bag")
+            .withStyle(style -> style.withColor(type.getColor())));
+
+        // Category
+        tooltipComponents.add(Component.literal("Stores: " + type.getCategory())
+            .withStyle(style -> style.withColor(0x808080))); // Gray
 
         // Tier info
         tooltipComponents.add(Component.literal("Tier: " + tier.getDisplayName())
