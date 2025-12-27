@@ -4,10 +4,12 @@
 # Beads configuration
 .beads/
 
-# Markdown files except README.md and CHANGELOG.md
+# Markdown files except key documentation
 *.md
 !README.md
 !CHANGELOG.md
+!ROADMAP.md
+!TEXTURES_NEEDED.md
 
 # Gradle
 .gradle/
