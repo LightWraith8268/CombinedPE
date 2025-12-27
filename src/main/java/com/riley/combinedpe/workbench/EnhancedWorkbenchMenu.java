@@ -2,11 +2,13 @@ package com.riley.combinedpe.workbench;
 
 import com.riley.combinedpe.bag.BagInventory;
 import com.riley.combinedpe.bag.ItemBuildersBag;
-import com.riley.combinedpe.registry.ModMenuTypes;
+import com.riley.combinedpe.core.ModBlocks;
+import com.riley.combinedpe.core.ModMenuTypes;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -67,20 +69,22 @@ public class EnhancedWorkbenchMenu extends AbstractContainerMenu {
     @Override
     public void slotsChanged(@NotNull Container inventory) {
         this.access.execute((level, pos) -> {
-            CraftingContainer craftingContainer = this.craftSlots;
+            CraftingInput craftingInput = this.craftSlots.asCraftInput();
             ItemStack result = ItemStack.EMPTY;
 
             // Find matching recipe
             if (!level.isClientSide) {
                 var recipeManager = level.getRecipeManager();
-                var optional = recipeManager.getRecipeFor(RecipeType.CRAFTING, craftingContainer, level);
+                var optional = recipeManager.getRecipeFor(RecipeType.CRAFTING, craftingInput, level);
 
                 if (optional.isPresent()) {
                     RecipeHolder<CraftingRecipe> holder = optional.get();
                     CraftingRecipe recipe = holder.value();
 
-                    if (this.resultSlots.setRecipeUsed(level, this.player, holder)) {
-                        result = recipe.assemble(craftingContainer, level.registryAccess());
+                    if (this.player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                        if (this.resultSlots.setRecipeUsed(level, serverPlayer, holder)) {
+                            result = recipe.assemble(craftingInput, level.registryAccess());
+                        }
                     }
                 }
             }

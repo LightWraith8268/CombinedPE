@@ -2,6 +2,7 @@ package com.riley.combinedpe.core;
 
 import com.riley.combinedpe.CombinedPE;
 import com.riley.combinedpe.bag.BagTier;
+import com.riley.combinedpe.bag.BagType;
 import com.riley.combinedpe.bag.ItemBuildersBag;
 import com.riley.combinedpe.bag.ItemStackUpgrade;
 import com.riley.combinedpe.bag.StackUpgradeTier;

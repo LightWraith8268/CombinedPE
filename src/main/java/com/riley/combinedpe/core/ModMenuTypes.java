@@ -33,5 +33,6 @@ public class ModMenuTypes {
      */
     public static final DeferredHolder<MenuType<?>, MenuType<EnhancedWorkbenchMenu>> ENHANCED_WORKBENCH =
             MENU_TYPES.register("enhanced_workbench",
-                    () -> IMenuTypeExtension.create(EnhancedWorkbenchMenu::new));
+                    () -> IMenuTypeExtension.create((containerId, playerInventory, data) ->
+                            new EnhancedWorkbenchMenu(containerId, playerInventory)));
 }

@@ -194,12 +194,11 @@ public enum BagType {
         switch (this) {
             case MATERIALS:
                 // Building blocks: blocks that can be placed
-                return item instanceof net.minecraft.world.level.block.Block
+                return item instanceof net.minecraft.world.item.BlockItem
                     || stack.is(net.minecraft.tags.ItemTags.PLANKS)
                     || stack.is(net.minecraft.tags.ItemTags.LOGS)
                     || stack.is(net.minecraft.tags.ItemTags.STONE_CRAFTING_MATERIALS)
-                    || stack.is(net.minecraft.tags.ItemTags.TERRACOTTA)
-                    || item instanceof net.minecraft.world.item.BlockItem;
+                    || stack.is(net.minecraft.tags.ItemTags.TERRACOTTA);
 
             case FOOD:
                 // Food items only (EXCLUSIVE - nothing else stores food)
