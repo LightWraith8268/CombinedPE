@@ -2,20 +2,19 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "BBB",
-    "BUB",
-    "BBB"
+    "U U",
+    " B ",
+    "U U"
   ],
   "key": {
     "B": {
       "item": "combinedpe:basic_combat_bag"
     },
     "U": {
-      "item": "minecraft:iron_ingot"
+      "item": "projecte:low_covalence_dust"
     }
   },
   "result": {
-    "id": "combinedpe:advanced_combat_bag",
-    "count": 8
+    "id": "combinedpe:advanced_combat_bag"
   }
 }

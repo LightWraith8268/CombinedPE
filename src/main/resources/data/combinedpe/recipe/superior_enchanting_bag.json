@@ -2,20 +2,19 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "BBB",
-    "BUB",
-    "BBB"
+    "U U",
+    " B ",
+    "U U"
   ],
   "key": {
     "B": {
       "item": "combinedpe:advanced_enchanting_bag"
     },
     "U": {
-      "item": "minecraft:gold_ingot"
+      "item": "projecte:medium_covalence_dust"
     }
   },
   "result": {
-    "id": "combinedpe:superior_enchanting_bag",
-    "count": 8
+    "id": "combinedpe:superior_enchanting_bag"
   }
 }

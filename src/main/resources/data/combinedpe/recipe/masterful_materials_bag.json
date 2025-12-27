@@ -2,20 +2,19 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "BBB",
-    "BUB",
-    "BBB"
+    "U U",
+    " B ",
+    "U U"
   ],
   "key": {
     "B": {
       "item": "combinedpe:superior_materials_bag"
     },
     "U": {
-      "item": "minecraft:diamond"
+      "item": "projecte:dark_matter"
     }
   },
   "result": {
-    "id": "combinedpe:masterful_materials_bag",
-    "count": 8
+    "id": "combinedpe:masterful_materials_bag"
   }
 }

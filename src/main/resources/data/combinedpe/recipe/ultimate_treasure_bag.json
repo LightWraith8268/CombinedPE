@@ -2,20 +2,19 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "BBB",
-    "BUB",
-    "BBB"
+    "U U",
+    " B ",
+    "U U"
   ],
   "key": {
     "B": {
       "item": "combinedpe:masterful_treasure_bag"
     },
     "U": {
-      "item": "minecraft:netherite_ingot"
+      "item": "projecte:red_matter"
     }
   },
   "result": {
-    "id": "combinedpe:ultimate_treasure_bag",
-    "count": 8
+    "id": "combinedpe:ultimate_treasure_bag"
   }
 }
