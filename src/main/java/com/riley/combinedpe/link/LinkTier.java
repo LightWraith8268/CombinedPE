@@ -4,7 +4,7 @@ package com.riley.combinedpe.link;
  * Defines the tiers for EMC Link blocks.
  * Each tier has different throughput rates and visual styling.
  *
- * Progression: 1/sec → 4/sec → 10/sec → 20/sec → 64/sec → 256/sec → 1024/sec → infinite
+ * Progression: 1/sec → 2/sec → 5/sec → 16/sec → 64/sec → 512/sec → 8192/sec → infinite
  */
 public enum LinkTier {
     /**
@@ -17,59 +17,59 @@ public enum LinkTier {
 
     /**
      * Advanced tier - early automation
-     * - 4 items/second (5 ticks per operation)
-     * - 400 RF/tick for Energy Link
+     * - 2 items/second (10 ticks per operation)
+     * - 250 RF/tick for Energy Link
      * - Blue color theme (#4169E1)
      */
-    ADVANCED("advanced", 5, 400, 0x4169E1),
+    ADVANCED("advanced", 10, 250, 0x4169E1),
 
     /**
      * Superior tier - mid-tier automation
-     * - 10 items/second (2 ticks per operation)
-     * - 1,000 RF/tick for Energy Link
+     * - 5 items/second (4 ticks per operation)
+     * - 500 RF/tick for Energy Link
      * - Purple color theme (#9370DB)
      */
-    SUPERIOR("superior", 2, 1000, 0x9370DB),
+    SUPERIOR("superior", 4, 500, 0x9370DB),
 
     /**
      * Masterful tier - high-speed automation
-     * - 20 items/second (1 tick per operation)
-     * - 2,500 RF/tick for Energy Link
+     * - 16 items/second (1.25 ticks, rounded to 1 tick, cap 16)
+     * - 1,000 RF/tick for Energy Link
      * - Gold color theme (#FFD700)
      */
-    MASTERFUL("masterful", 1, 2500, 0xFFD700),
+    MASTERFUL("masterful", 1, 16, 1000, 0xFFD700),
 
     /**
      * Eminent tier - very high speed
      * - 64 items/tick max (every tick, max 64 items)
-     * - 5,000 RF/tick for Energy Link
+     * - 2,500 RF/tick for Energy Link
      * - Cyan color theme (#00CED1)
      */
-    EMINENT("eminent", 1, 64, 5000, 0x00CED1),
+    EMINENT("eminent", 1, 64, 2500, 0x00CED1),
 
     /**
      * Supreme tier - extreme speed
-     * - 256 items/tick max (every tick, max 256 items)
+     * - 512 items/tick max (every tick, max 512 items)
      * - 10,000 RF/tick for Energy Link
      * - Magenta color theme (#FF00FF)
      */
-    SUPREME("supreme", 1, 256, 10000, 0xFF00FF),
+    SUPREME("supreme", 1, 512, 10000, 0xFF00FF),
 
     /**
      * Transcendent tier - near-infinite speed
-     * - 1024 items/tick max (every tick, max 1024 items)
-     * - 25,000 RF/tick for Energy Link
+     * - 8192 items/tick max (every tick, max 8192 items)
+     * - 50,000 RF/tick for Energy Link
      * - Orange color theme (#FF8C00)
      */
-    TRANSCENDENT("transcendent", 1, 1024, 25000, 0xFF8C00),
+    TRANSCENDENT("transcendent", 1, 8192, 50000, 0xFF8C00),
 
     /**
      * Ultimate tier - INFINITE throughput
      * - No limit (processes any amount instantly)
-     * - 100,000 RF/tick for Energy Link
+     * - 250,000 RF/tick for Energy Link
      * - Deep Pink color theme (#FF1493)
      */
-    ULTIMATE("ultimate", 0, 0, 100000, 0xFF1493);
+    ULTIMATE("ultimate", 0, 0, 250000, 0xFF1493);
 
     private final String name;
     private final int ticksPerOperation;
