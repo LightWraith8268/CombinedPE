@@ -3,6 +3,7 @@
 
   "_comment_blocks": "Blocks",
   "block.combinedpe.enhanced_workbench": "Enhanced Workbench",
+  "block.combinedpe.emc_linker": "EMC Linker",
 
   "_comment_containers": "Containers/GUIs",
   "container.combinedpe.enhanced_workbench": "Enhanced Workbench",

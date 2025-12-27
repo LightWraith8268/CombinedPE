@@ -111,10 +111,44 @@ public class EMCExternalStorageProvider implements ExternalStorageProvider {
 
     @Override
     public Iterator<ResourceAmount> iterator() {
-        // TEMPORARY: Return empty iterator to prevent performance issues
-        // TODO: Implement ProjectEX-style item-specific links instead
-        // (Player sets a specific item, link only shows/handles that item)
-        return new ArrayList<ResourceAmount>().iterator();
+        List<ResourceAmount> resources = new ArrayList<>();
+
+        // Check if this External Storage has an EMC link configured
+        EMCLink.LinkData link = EMCLink.getLink(level, pos);
+        if (link == null) {
+            // No link configured - return empty (prevents performance issues)
+            return resources.iterator();
+        }
+
+        // Find the player who owns this link
+        ServerPlayer player = level.getServer().getPlayerList().getPlayer(link.playerUUID);
+        if (player == null) {
+            // Player offline - return empty
+            return resources.iterator();
+        }
+
+        // Get player's knowledge
+        IKnowledgeProvider knowledge = getKnowledge(player);
+        if (knowledge == null) {
+            return resources.iterator();
+        }
+
+        // Check if player has learned the linked item
+        ItemInfo itemInfo = ItemInfo.fromStack(link.linkedItem);
+        if (!knowledge.hasKnowledge(itemInfo)) {
+            // Player hasn't learned this item yet - return empty
+            return resources.iterator();
+        }
+
+        // Calculate how many of the linked item the player can afford
+        long maxQuantity = calculateMaxQuantity(knowledge, link.linkedItem);
+        if (maxQuantity > 0) {
+            // Show the linked item with quantity based on player's EMC
+            ItemResource itemResource = ItemResource.ofItemStack(link.linkedItem);
+            resources.add(new ResourceAmount(itemResource, maxQuantity));
+        }
+
+        return resources.iterator();
     }
 
     @Override

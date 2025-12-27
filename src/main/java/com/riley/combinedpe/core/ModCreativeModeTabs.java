@@ -22,8 +22,9 @@ public class ModCreativeModeTabs {
                     .title(Component.translatable("itemGroup.combinedpe"))
                     .icon(() -> new ItemStack(ModItems.ULTIMATE_TREASURE_BAG.get()))
                     .displayItems((parameters, output) -> {
-                        // Enhanced Workbench
+                        // Blocks
                         output.accept(ModBlocks.ENHANCED_WORKBENCH.get());
+                        output.accept(ModBlocks.EMC_LINKER.get());
 
                         // Builder's Bags - organized by type, then tier
                         // Materials Bags

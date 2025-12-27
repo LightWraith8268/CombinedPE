@@ -196,4 +196,10 @@ public class ModItems {
             ModBlocks.ENHANCED_WORKBENCH.get(), new Item.Properties()
         ));
 
+    // EMC Linker block item
+    public static final DeferredHolder<Item, net.minecraft.world.item.BlockItem> EMC_LINKER =
+        ITEMS.register("emc_linker", () -> new net.minecraft.world.item.BlockItem(
+            ModBlocks.EMC_LINKER.get(), new Item.Properties()
+        ));
+
 }
