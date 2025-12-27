@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "combinedpe:item/superior_treasure_bag"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "combinedpe:block/emc_linker"
+    },
+    "facing=south": {
+      "model": "combinedpe:block/emc_linker",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "combinedpe:block/emc_linker",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "combinedpe:block/emc_linker",
+      "y": 90
+    },
+    "facing=up": {
+      "model": "combinedpe:block/emc_linker",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "combinedpe:block/emc_linker",
+      "x": 90
+    }
+  }
+}
