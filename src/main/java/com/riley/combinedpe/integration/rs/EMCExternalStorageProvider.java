@@ -111,47 +111,10 @@ public class EMCExternalStorageProvider implements ExternalStorageProvider {
 
     @Override
     public Iterator<ResourceAmount> iterator() {
-        List<ResourceAmount> resources = new ArrayList<>();
-
-        // Find nearest player
-        ServerPlayer player = findNearestPlayer();
-        if (player == null) {
-            return resources.iterator();
-        }
-
-        // Get player's knowledge
-        IKnowledgeProvider knowledge = getKnowledge(player);
-        if (knowledge == null) {
-            return resources.iterator();
-        }
-
-        // Get all learned items
-        for (ItemInfo itemInfo : knowledge.getKnowledge()) {
-            // Convert ItemInfo to ItemStack
-            ItemStack stack = itemInfo.createStack();
-            if (stack.isEmpty()) {
-                continue;
-            }
-
-            // Check if item has EMC value
-            if (!ProjectECompat.hasEMC(stack)) {
-                continue;
-            }
-
-            // Calculate max quantity based on player's EMC
-            long maxQuantity = calculateMaxQuantity(knowledge, stack);
-            if (maxQuantity <= 0) {
-                continue;
-            }
-
-            // Convert to RS ItemResource
-            ItemResource itemResource = ItemResource.ofItemStack(stack);
-
-            // Add to resource list with calculated quantity
-            resources.add(new ResourceAmount(itemResource, maxQuantity));
-        }
-
-        return resources.iterator();
+        // TEMPORARY: Return empty iterator to prevent performance issues
+        // TODO: Implement ProjectEX-style item-specific links instead
+        // (Player sets a specific item, link only shows/handles that item)
+        return new ArrayList<ResourceAmount>().iterator();
     }
 
     @Override
