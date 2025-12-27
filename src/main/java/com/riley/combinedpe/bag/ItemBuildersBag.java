@@ -83,18 +83,33 @@ public class ItemBuildersBag extends Item {
     }
 
     /**
-     * Handle right-click to open the bag
+     * Handle right-click to open the bag or eat from Food Bag
      */
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+
+        // Food Bag Quick Eat feature - right-click to eat from bag (Basic+ tier)
+        if (type == BagType.FOOD && player.canEat(false)) {
+            BagInventory inventory = getInventory(stack);
+
+            // Find first edible food item in bag
+            for (int slot = 0; slot < inventory.getSlots(); slot++) {
+                ItemStack foodStack = inventory.getStackInSlot(slot);
+                if (!foodStack.isEmpty() && foodStack.getFoodProperties(player) != null) {
+                    // Found food - start eating
+                    player.startUsingItem(hand);
+                    return InteractionResultHolder.consume(stack);
+                }
+            }
+        }
 
         if (!level.isClientSide) {
             // Open the bag GUI
             player.openMenu(new net.minecraft.world.MenuProvider() {
                 @Override
                 public @org.jetbrains.annotations.NotNull Component getDisplayName() {
-                    return Component.literal(tier.getDisplayName() + " Builder's Bag");
+                    return Component.literal(tier.getDisplayName() + " " + type.getDisplayName() + " Bag");
                 }
 
                 @Override
@@ -108,6 +123,58 @@ public class ItemBuildersBag extends Item {
         }
 
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+    }
+
+    /**
+     * Handle eating from Food Bag
+     */
+    @Override
+    public ItemStack finishUsingItem(ItemStack stack, Level level, net.minecraft.world.entity.LivingEntity entity) {
+        if (type == BagType.FOOD && entity instanceof Player player) {
+            BagInventory inventory = getInventory(stack);
+
+            // Find first edible food item in bag
+            for (int slot = 0; slot < inventory.getSlots(); slot++) {
+                ItemStack foodStack = inventory.getStackInSlot(slot);
+                if (!foodStack.isEmpty() && foodStack.getFoodProperties(player) != null) {
+                    // Eat the food
+                    ItemStack result = foodStack.finishUsingItem(level, player);
+
+                    // Remove 1 item from bag
+                    ItemStack remaining = foodStack.copy();
+                    remaining.shrink(1);
+                    BagInventory newInventory = inventory.setStackInSlot(slot, remaining);
+                    setInventory(stack, newInventory);
+
+                    break;
+                }
+            }
+        }
+
+        return stack;
+    }
+
+    /**
+     * How long it takes to eat from Food Bag
+     */
+    @Override
+    public int getUseDuration(ItemStack stack, net.minecraft.world.entity.LivingEntity entity) {
+        if (type == BagType.FOOD) {
+            // Use standard eating duration
+            return 32;
+        }
+        return 0;
+    }
+
+    /**
+     * Food Bag uses EAT animation
+     */
+    @Override
+    public net.minecraft.world.item.UseAnim getUseAnimation(ItemStack stack) {
+        if (type == BagType.FOOD) {
+            return net.minecraft.world.item.UseAnim.EAT;
+        }
+        return net.minecraft.world.item.UseAnim.NONE;
     }
 
     /**

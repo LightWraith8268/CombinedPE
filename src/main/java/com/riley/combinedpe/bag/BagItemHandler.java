@@ -178,6 +178,15 @@ public class BagItemHandler implements IItemHandler {
     @Override
     public boolean isItemValid(int slot, @NotNull ItemStack stack) {
         // Prevent bag-in-bag nesting
-        return !(stack.getItem() instanceof ItemBuildersBag);
+        if (stack.getItem() instanceof ItemBuildersBag) {
+            return false;
+        }
+
+        // Check type-specific filtering
+        if (bagStack.getItem() instanceof ItemBuildersBag bagItem) {
+            return bagItem.getType().canStore(stack);
+        }
+
+        return true;
     }
 }
