@@ -226,6 +226,13 @@ public abstract class LinkBaseBlockEntity extends BlockEntity implements IEmcSto
 
         tickCounter++;
 
+        // For Ultimate tier (infinite throughput), process operations every tick
+        // For other tiers, respect the tick delay
+        if (tier.getTicksPerOperation() == 0 || tickCounter >= tier.getTicksPerOperation()) {
+            tickCounter = 0;
+            // Subclasses can override to process buffered operations here
+        }
+
         // Sync buffered EMC to player every second
         if (tickCounter % 20 == 0 && !storedEMC.equals(BigInteger.ZERO)) {
             addEMCToOwner(storedEMC);

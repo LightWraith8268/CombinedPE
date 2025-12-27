@@ -15,19 +15,19 @@ public enum LinkTier {
 
     /**
      * Advanced tier - medium throughput
-     * - 4 items/second (5 ticks per operation)
+     * - 8 items/second (2.5 ticks per operation, rounded to 3 ticks)
      * - 1,000 RF/tick for Energy Link
      * - Blue color theme
      */
-    ADVANCED("advanced", 5, 1000, 0x4169E1),
+    ADVANCED("advanced", 3, 1000, 0x4169E1),
 
     /**
-     * Ultimate tier - fastest throughput
-     * - 16 items/second (1 tick per operation, max 16/tick)
+     * Ultimate tier - INFINITE throughput
+     * - No tick delay (0 ticks = instant/unlimited)
      * - 10,000 RF/tick for Energy Link
      * - Purple/Pink color theme
      */
-    ULTIMATE("ultimate", 1, 10000, 0xFF1493);
+    ULTIMATE("ultimate", 0, 10000, 0xFF1493);
 
     private final String name;
     private final int ticksPerOperation;
