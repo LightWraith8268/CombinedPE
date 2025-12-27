@@ -7,6 +7,7 @@ import com.riley.combinedpe.CombinedPE;
 import com.riley.combinedpe.emc.DynamicEMCMapper;
 import com.riley.combinedpe.emc.EMCCache;
 import com.riley.combinedpe.integration.projecte.ProjectECompat;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
@@ -27,7 +28,7 @@ import net.minecraft.world.item.ItemStack;
  */
 public class CombinedPECommand {
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
         dispatcher.register(
             Commands.literal("combinedpe")
                 .requires(source -> source.hasPermission(2)) // Requires OP level 2
@@ -35,7 +36,7 @@ public class CombinedPECommand {
                     .executes(CombinedPECommand::rescan)
                 )
                 .then(Commands.literal("setemc")
-                    .then(Commands.argument("item", ItemArgument.item(null))
+                    .then(Commands.argument("item", ItemArgument.item(buildContext))
                         .then(Commands.argument("value", IntegerArgumentType.integer(0))
                             .executes(CombinedPECommand::setEMC)
                         )
@@ -43,7 +44,7 @@ public class CombinedPECommand {
                 )
                 .then(Commands.literal("getemc")
                     .executes(CombinedPECommand::getEMCHeld)
-                    .then(Commands.argument("item", ItemArgument.item(null))
+                    .then(Commands.argument("item", ItemArgument.item(buildContext))
                         .executes(CombinedPECommand::getEMCItem)
                     )
                 )

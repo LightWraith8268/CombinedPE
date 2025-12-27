@@ -17,7 +17,7 @@ public class ModEvents {
      */
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        CombinedPECommand.register(event.getDispatcher());
+        CombinedPECommand.register(event.getDispatcher(), event.getBuildContext());
         CombinedPE.LOGGER.info("Registered CombinedPE commands");
     }
 }
