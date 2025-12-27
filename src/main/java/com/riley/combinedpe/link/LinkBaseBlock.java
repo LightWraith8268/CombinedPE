@@ -1,5 +1,6 @@
 package com.riley.combinedpe.link;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -28,12 +29,22 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class LinkBaseBlock extends BaseEntityBlock {
 
+    // Codec for block serialization (required by BaseEntityBlock)
+    public static final MapCodec<LinkBaseBlock> CODEC = simpleCodec(properties -> {
+        throw new UnsupportedOperationException("LinkBaseBlock should not be instantiated directly");
+    });
+
     public LinkBaseBlock() {
         super(BlockBehaviour.Properties.of()
                 .strength(5.0F, 6.0F)
                 .sound(SoundType.STONE)
                 .requiresCorrectToolForDrops()
         );
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     @Override
