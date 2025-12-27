@@ -1,7 +1,7 @@
 # CombinedPE Development Roadmap
 
-## Current Version: 1.7.6
-**Status:** ✅ Build Complete - Ready for Testing
+## Current Version: 1.7.7
+**Status:** ✅ Phase 4 Complete - RS Integration Active
 
 ---
 
@@ -105,26 +105,65 @@
 
 ---
 
-## Phase 4: Refined Storage Integration (PLANNED)
+## Phase 4: Refined Storage Integration ✅ COMPLETE
 
-### External Storage
-- [ ] RS External Storage for EMC access (CombinedPE-1g2) ✅ CLOSED
-- [ ] Test with Refined Storage items (CombinedPE-52g) ✅ CLOSED
-- [ ] Grid EMC value display (CombinedPE-vdl) ✅ CLOSED
+### External Storage System
+- ✅ RS External Storage for EMC access (CombinedPE-1g2)
+- ✅ EMC Link system to prevent world hanging
+- ✅ Builder's Bag External Storage provider
+- ✅ EMC External Storage provider
 
-### Integration Features
-- [ ] EMC value tooltip in RS grid
-- [ ] Auto-import from EMC system
-- [ ] Auto-export to EMC system
-- [ ] Pattern support for transmutation
+### EMC Linker Block
+- ✅ Directional block implementation (BlockEMCLinker)
+- ✅ Link configuration system (EMCLink.java)
+- ✅ Right-click to set item link
+- ✅ Sneak + right-click to clear link
+- ✅ 10×10×10 glowing cube model
+- ✅ Crafting recipe (Iron + Diamond + Ender Pearl)
+- ✅ Block registration and localization
 
-**Dependencies:**
-- Refined Storage 2.0.0+ for NeoForge 1.21.1
-- Successful Phase 3 testing
+### Performance Optimization
+- ✅ Fixed world hanging bug (iterator showing 1000+ items)
+- ✅ Implemented ProjectEX-style item-specific links
+- ✅ Each External Storage shows only ONE configured item
+- ✅ Per-dimension, per-position link storage
+
+### Integration Status
+- ✅ RS integration re-enabled in RefinedStorageIntegration.java
+- ✅ EMC External Storage registered with API
+- ✅ Builder's Bag External Storage registered with API
+- ✅ Full logging and error handling
+
+**How to Use:**
+1. Place RS External Storage block
+2. Place EMC Linker adjacent to it (any direction)
+3. Right-click EMC Linker with desired item
+4. RS Grid will show that item from EMC (limited by player's EMC balance)
+5. Items extracted automatically deduct EMC from player
+
+**Build:** v1.7.7 - 209KB jar
 
 ---
 
-## Phase 5: JEI/EMI Integration (PLANNED)
+## Phase 5: Polish & Testing (PLANNED)
+
+### Testing
+- [ ] Comprehensive in-game testing (CombinedPE-311)
+- [ ] RS integration testing with EMC Linker
+- [ ] Performance profiling
+- [ ] Bug fixes and refinement
+
+### Polish
+- [ ] Create EMC Linker texture (currently using placeholder)
+- [ ] Add tooltips and user guidance
+- [ ] Documentation for RS integration
+- [ ] Recipe book integration
+
+**Priority:** P1 - Essential for release
+
+---
+
+## Phase 6: JEI/EMI Integration (PLANNED)
 
 ### Recipe Integration
 - [ ] JEI/EMI plugin (CombinedPE-hxd)
@@ -139,7 +178,7 @@
 
 ---
 
-## Phase 6: ProjectEX Port (PLANNED)
+## Phase 7: ProjectEX Port (PLANNED)
 
 ### Research Phase
 - [ ] Research ProjectEX features (CombinedPE-0lm)
@@ -157,7 +196,7 @@
 
 ---
 
-## Phase 7: Advanced Features (PLANNED)
+## Phase 8: Advanced Features (PLANNED)
 
 ### Configuration
 - [ ] In-game config GUI (CombinedPE-ens) - P3
@@ -178,7 +217,7 @@
 
 ---
 
-## Phase 8: Multi-Version Support (FUTURE)
+## Phase 9: Multi-Version Support (FUTURE)
 
 ### Fabric Port
 - [ ] Configure multi-loader build (CombinedPE-qo0) - P2
@@ -214,12 +253,19 @@
 
 ## Recent Milestones
 
-### v1.7.6 (Current - 2025-12-27)
+### v1.7.7 (Current - 2025-12-27)
+- **Phase 4 Complete:** Refined Storage Integration
+- Fixed texture display bug (added 70 item models)
+- Implemented EMC Linker block system
+- Re-enabled RS External Storage integration
+- Fixed world hanging performance issue
+- **Status:** RS integration active and ready for testing
+
+### v1.7.6 (2025-12-27)
 - Fixed all compilation errors (85 total)
 - Updated to 65-bag system throughout
 - Added complete localization
 - Created testing documentation
-- **Status:** Ready for in-game testing
 
 ### v1.7.5 (Previous)
 - Enhanced Workbench implementation
@@ -240,23 +286,33 @@
 
 ## Next Actions
 
-**Immediate (Waiting on User):**
-1. In-game testing of v1.7.6
-2. Verify all 65 bags work correctly
-3. Test Enhanced Workbench functionality
-4. Document any issues found
+**Immediate (Ready for Testing):**
+1. In-game testing of v1.7.7
+2. Verify all 65 bags display textures correctly
+3. Test RS integration with EMC Linker
+   - Place RS External Storage
+   - Configure EMC Linker with item
+   - Verify item appears in RS Grid
+   - Test EMC deduction on extraction
+4. Test Enhanced Workbench functionality
+5. Document any issues found
 
-**Short Term (After Testing):**
-1. Fix any bugs found in testing
-2. Begin JEI/EMI integration
-3. Research ProjectEX porting requirements
-4. Plan Refined Storage integration
+**Short Term (Phase 5):**
+1. Create EMC Linker texture (replace placeholder)
+2. Add tooltips and user guidance
+3. Fix any bugs found in testing
+4. Performance profiling and optimization
+5. Complete testing documentation
+
+**Medium Term (Phase 6-7):**
+1. Begin JEI/EMI integration
+2. Research ProjectEX porting requirements
+3. Plan additional features
 
 **Long Term:**
 1. Complete ProjectEX port
 2. Multi-loader support (Fabric)
-3. Performance optimization
-4. Version compatibility updates
+3. Version compatibility updates
 
 ---
 
@@ -280,4 +336,4 @@
 ---
 
 **Last Updated:** 2025-12-27
-**Next Review:** After v1.7.6 testing complete
+**Next Review:** After v1.7.7 Phase 5 (Polish & Testing) complete
