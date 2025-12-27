@@ -1,6 +1,10 @@
 {
   "itemGroup.combinedpe": "CombinedPE",
 
+  "_comment": "Blocks",
+  "block.combinedpe.enhanced_workbench": "Enhanced Workbench",
+  "container.combinedpe.enhanced_workbench": "Enhanced Workbench",
+
   "_comment": "Configuration",
   "config.combinedpe.title": "CombinedPE Configuration",
   "config.combinedpe.dynamic_registration": "Dynamic EMC Registration",

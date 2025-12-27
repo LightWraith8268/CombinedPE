@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    "BUB",
+    "BBB"
+  ],
+  "key": {
+    "B": {
+      "item": "combinedpe:superior_ore_bag"
+    },
+    "U": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "id": "combinedpe:masterful_ore_bag",
+    "count": 8
+  }
+}

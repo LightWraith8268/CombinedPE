@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    "BUB",
+    "BBB"
+  ],
+  "key": {
+    "B": {
+      "item": "combinedpe:advanced_mob_drop_bag"
+    },
+    "U": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "id": "combinedpe:superior_mob_drop_bag",
+    "count": 8
+  }
+}

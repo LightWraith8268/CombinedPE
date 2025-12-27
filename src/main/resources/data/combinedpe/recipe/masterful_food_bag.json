@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    "BUB",
+    "BBB"
+  ],
+  "key": {
+    "B": {
+      "item": "combinedpe:superior_food_bag"
+    },
+    "U": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "id": "combinedpe:masterful_food_bag",
+    "count": 8
+  }
+}

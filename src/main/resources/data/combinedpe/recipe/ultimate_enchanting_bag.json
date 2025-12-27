@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    "BUB",
+    "BBB"
+  ],
+  "key": {
+    "B": {
+      "item": "combinedpe:masterful_enchanting_bag"
+    },
+    "U": {
+      "item": "minecraft:netherite_ingot"
+    }
+  },
+  "result": {
+    "id": "combinedpe:ultimate_enchanting_bag",
+    "count": 8
+  }
+}
