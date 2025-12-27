@@ -30,6 +30,8 @@ public class ItemBuildersBag extends Item {
         super(properties
             .stacksTo(1) // Bags don't stack
             .component(ModDataComponents.BAG_INVENTORY.get(), BagInventory.empty(tier.getCapacity()))
+            .component(ModDataComponents.VIRTUAL_STACKS.get(), VirtualStackData.empty())
+            .component(ModDataComponents.STACK_UPGRADE.get(), StackUpgradeTier.NONE)
         );
         this.tier = tier;
     }
@@ -108,6 +110,22 @@ public class ItemBuildersBag extends Item {
         tooltipComponents.add(Component.literal(
             String.format("Capacity: %d slots (%s items)", tier.getCapacity(), formattedCount)
         ));
+
+        // Stack upgrade info
+        StackUpgradeTier upgrade = stack.getOrDefault(ModDataComponents.STACK_UPGRADE.get(), StackUpgradeTier.NONE);
+        if (upgrade != StackUpgradeTier.NONE) {
+            int maxPerSlot = tier.getMaxStackSize() * upgrade.getMultiplier();
+            String maxFormatted = BagInventory.formatItemCount(maxPerSlot);
+            tooltipComponents.add(Component.literal(
+                String.format("Stack Upgrade: %s (%s/slot)", upgrade.getDisplayName(), maxFormatted)
+            ).withStyle(style -> style.withColor(0x00FF00))); // Green
+        } else {
+            int maxPerSlot = tier.getMaxStackSize();
+            String maxFormatted = BagInventory.formatItemCount(maxPerSlot);
+            tooltipComponents.add(Component.literal(
+                String.format("Max Stack: %s/slot", maxFormatted)
+            ).withStyle(style -> style.withColor(0x808080))); // Gray
+        }
 
         // Module info
         tooltipComponents.add(Component.literal(""));

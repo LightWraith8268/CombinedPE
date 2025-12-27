@@ -64,8 +64,21 @@ public class BagSlot extends Slot {
 
     @Override
     public int getMaxStackSize() {
-        // This will be overridden by stack upgrades later
-        return 64;
+        // Get stack upgrade tier from bag
+        StackUpgradeTier upgrade = bagStack.getOrDefault(
+            com.riley.combinedpe.registry.ModDataComponents.STACK_UPGRADE.get(),
+            StackUpgradeTier.NONE
+        );
+
+        // Calculate max stack size based on tier's natural multiplier and upgrade
+        if (bagStack.getItem() instanceof ItemBuildersBag bagItem) {
+            BagTier bagTier = bagItem.getTier();
+            int baseMax = bagTier.getMaxStackSize(); // Tier's natural max (64, 256, 1024, etc.)
+            int upgradeMultiplier = upgrade.getMultiplier();
+            return baseMax * upgradeMultiplier;
+        }
+
+        return 64; // Fallback
     }
 
     @Override

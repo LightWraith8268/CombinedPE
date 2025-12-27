@@ -28,6 +28,12 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.SUPERIOR_BAG.get());
                         output.accept(ModItems.MASTERFUL_BAG.get());
                         output.accept(ModItems.ULTIMATE_BAG.get());
+
+                        // Stack Upgrades
+                        output.accept(ModItems.STACK_UPGRADE_I.get());
+                        output.accept(ModItems.STACK_UPGRADE_II.get());
+                        output.accept(ModItems.STACK_UPGRADE_III.get());
+                        output.accept(ModItems.STACK_UPGRADE_IV.get());
                     })
                     .build());
 }
