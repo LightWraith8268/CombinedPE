@@ -1,12 +1,17 @@
 package com.riley.combinedpe.bag;
 
 import com.riley.combinedpe.CombinedPE;
+import com.riley.combinedpe.integration.projecte.ProjectECompat;
+import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
+import moze_intel.projecte.api.capabilities.PECapabilities;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+
+import java.math.BigInteger;
 
 /**
  * Handles automatic block provision from Builder's Bags
@@ -89,6 +94,98 @@ public class BlockProviderHandler {
                 return;
             }
         }
+
+        // If we couldn't find items in any bag, try EMC transmutation
+        // This only works with Ultimate tier bags that have EMC Provider Module
+        tryTransmuteFromEMC(player, hand, currentStack);
+    }
+
+    /**
+     * Try to transmute items from the player's EMC using an Ultimate tier bag
+     */
+    private static void tryTransmuteFromEMC(Player player, net.minecraft.world.InteractionHand hand, ItemStack currentStack) {
+        // Skip if stack is empty (can't determine what to transmute)
+        if (currentStack.isEmpty()) {
+            return;
+        }
+
+        // Check if player has an Ultimate bag with EMC Provider Module
+        Inventory inventory = player.getInventory();
+        boolean hasUltimateBag = false;
+
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            ItemStack stack = inventory.getItem(slot);
+
+            if (ItemBuildersBag.isBag(stack)) {
+                BagTier tier = ItemBuildersBag.getTier(stack);
+                if (tier.hasEMCProviderModule()) {
+                    hasUltimateBag = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasUltimateBag) {
+            return; // No Ultimate bag, can't use EMC
+        }
+
+        // Check if the item has EMC value
+        if (!ProjectECompat.hasEMC(currentStack)) {
+            CombinedPE.LOGGER.debug("Item {} has no EMC value, cannot transmute", currentStack.getItem());
+            return;
+        }
+
+        long emcPerItem = ProjectECompat.getEMCValue(currentStack);
+        int desiredCount = 64; // Try to get a full stack
+        long totalEMCNeeded = emcPerItem * desiredCount;
+
+        // Get player's knowledge capability
+        IKnowledgeProvider knowledge = player.getCapability(PECapabilities.KNOWLEDGE_CAPABILITY);
+        if (knowledge == null) {
+            CombinedPE.LOGGER.debug("Player has no ProjectE knowledge capability");
+            return;
+        }
+
+        // Check if player has learned this item
+        if (!knowledge.hasKnowledge(currentStack)) {
+            CombinedPE.LOGGER.debug("Player hasn't learned {}, cannot transmute", currentStack.getItem());
+            return;
+        }
+
+        // Check if player has enough EMC
+        BigInteger playerEMC = knowledge.getEmc();
+        BigInteger emcNeeded = BigInteger.valueOf(totalEMCNeeded);
+
+        if (playerEMC.compareTo(emcNeeded) < 0) {
+            // Not enough EMC for full stack, try to get as many as possible
+            long affordableCount = playerEMC.divide(BigInteger.valueOf(emcPerItem)).longValue();
+            if (affordableCount <= 0) {
+                CombinedPE.LOGGER.debug("Player has insufficient EMC to transmute {}", currentStack.getItem());
+                return;
+            }
+            desiredCount = (int) Math.min(affordableCount, 64);
+            totalEMCNeeded = emcPerItem * desiredCount;
+            emcNeeded = BigInteger.valueOf(totalEMCNeeded);
+        }
+
+        // Deduct EMC from player
+        BigInteger newEMC = playerEMC.subtract(emcNeeded);
+        knowledge.setEmc(newEMC);
+
+        // Sync EMC to client
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            knowledge.syncEmc(serverPlayer);
+        }
+
+        // Create the transmuted items
+        ItemStack transmuted = currentStack.copy();
+        transmuted.setCount(desiredCount);
+
+        // Add to player's hand
+        currentStack.grow(desiredCount);
+
+        CombinedPE.LOGGER.info("Transmuted {} x{} using {} EMC from player's knowledge",
+            transmuted.getItem(), desiredCount, totalEMCNeeded);
     }
 
     /**
