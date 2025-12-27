@@ -50,13 +50,19 @@ public class RefinedStorageIntegration {
             com.refinedmods.refinedstorage.common.api.RefinedStorageApi api =
                 com.refinedmods.refinedstorage.common.api.RefinedStorageApi.INSTANCE;
 
+            // Register EMC External Storage provider
             api.addExternalStorageProviderFactory((level, pos, direction) -> {
-                // Create EMC External Storage provider for this position
                 return new EMCExternalStorageProvider(level, pos);
             });
 
+            // Register Builder's Bag External Storage provider
+            api.addExternalStorageProviderFactory((level, pos, direction) -> {
+                return new BagExternalStorageProvider(level, pos);
+            });
+
             CombinedPE.LOGGER.info("RS EMC External Storage integration registered successfully");
-            CombinedPE.LOGGER.info("Place RS External Storage near you to access EMC transmutation");
+            CombinedPE.LOGGER.info("RS Builder's Bag External Storage integration registered successfully");
+            CombinedPE.LOGGER.info("Place RS External Storage near you to access EMC transmutation and bag inventory");
         } catch (Exception e) {
             CombinedPE.LOGGER.error("Failed to register RS integration", e);
         }

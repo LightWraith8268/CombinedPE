@@ -64,6 +64,17 @@ public class ItemBuildersBag extends Item {
     }
 
     /**
+     * Get an IItemHandler for the bag's inventory.
+     * Returns null if the stack is not a Builder's Bag.
+     */
+    public static net.neoforged.neoforge.items.IItemHandler getItemHandler(ItemStack stack) {
+        if (!(stack.getItem() instanceof ItemBuildersBag)) {
+            return null;
+        }
+        return new BagItemHandler(stack);
+    }
+
+    /**
      * Handle right-click to open the bag
      */
     @Override
