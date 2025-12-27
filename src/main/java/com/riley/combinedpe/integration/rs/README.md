@@ -6,44 +6,48 @@ This package contains integration code for Refined Storage 2.0, allowing players
 
 ## Current Status
 
-**Implementation:** Complete but commented out
-**Reason:** RS 2.0 dependency not included in build to keep mod lightweight
+**Implementation:** ✅ ENABLED
+**Version:** 1.7.2
 
 ## How It Works
 
-When enabled:
-1. Player places RS External Storage block next to any block
-2. RS External Storage finds nearest player (within 16 blocks)
-3. Player can extract items they've learned in ProjectE knowledge
-4. Extraction quantity limited by player's EMC balance
-5. EMC automatically deducted on extraction
+When an RS External Storage block is placed and connected to a Refined Storage network:
 
-## How to Enable
+1. **Player Detection**: Finds the nearest player within 16 blocks
+2. **Knowledge Access**: Uses that player's ProjectE knowledge (learned items)
+3. **Full Inventory Listing**: Shows ALL learned items in RS Grid
+4. **Real-Time Quantity**: Each item's quantity is calculated from:
+   - Item's EMC value
+   - Player's current EMC balance
+   - Formula: `quantity = playerEMC / itemEMC`
+5. **Extraction**: When RS extracts items:
+   - Deducts EMC cost from player's balance
+   - Returns the transmuted items
+6. **Read-Only**: Inserting items into the EMC storage is blocked
 
-### Step 1: Add RS Dependency
+## Usage
 
-Download Refined Storage 2.0 jar and place in `libs/` directory, then add to `build.gradle.kts`:
+**Already Enabled!** Just install CombinedPE alongside Refined Storage 2.0.
 
-```kotlin
-dependencies {
-    // ... existing dependencies
+### In-Game Setup:
 
-    // Refined Storage 2.0 - Optional integration
-    compileOnly(files("libs/refinedstorage-neoforge-2.0.0-beta.X.jar"))
-}
-```
+1. Place an RS External Storage block
+2. Connect it to your RS network
+3. Stand within 16 blocks of the External Storage
+4. Open your RS Grid
 
-### Step 2: Uncomment Registration Code
+**Result:** You'll see ALL your learned ProjectE items with quantities based on your EMC!
 
-In `RefinedStorageIntegration.java`, uncomment the registration code (lines marked with TODO).
+### Example:
 
-### Step 3: Build and Test
+- **Player EMC:** 1,000,000
+- **Learned Items:**
+  - Dirt (1 EMC) → Shows 1,000,000 available
+  - Cobblestone (1 EMC) → Shows 1,000,000 available
+  - Iron Ingot (256 EMC) → Shows 3,906 available
+  - Diamond (8,192 EMC) → Shows 122 available
 
-```bash
-./gradlew build
-```
-
-The integration will automatically activate when RS is detected at runtime.
+As you extract items, your EMC decreases and quantities update in real-time!
 
 ## Files
 
@@ -53,14 +57,15 @@ The integration will automatically activate when RS is detected at runtime.
 
 ## Design Notes
 
-### Why This Approach?
+### Full Item Listing
 
-Unlike trying to list all learned items (complex), we use RS's query-based approach:
-- RS queries: "Do you have item X?"
-- We respond: "Yes, up to N quantity (based on EMC)"
-- RS extracts: We transmute using player's EMC
+The iterator returns ALL learned items with their calculated quantities:
+- Iterates through player's ProjectE knowledge (`IKnowledgeProvider.getKnowledge()`)
+- Filters items that have EMC values
+- Calculates max quantity per item: `playerEMC / itemEMC`
+- Returns as `ResourceAmount` list for RS Grid display
 
-This is simpler and more efficient.
+This provides a complete view of available EMC transmutations directly in RS!
 
 ### Player Association
 
@@ -94,6 +99,6 @@ When enabled, test:
 
 ---
 
-**Version:** 1.7.0 (when enabled)
+**Version:** 1.7.2
 **Author:** Riley E. Antrobus
 **License:** All Rights Reserved

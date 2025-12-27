@@ -23,16 +23,17 @@ import java.util.List;
  * RS External Storage provider for ProjectE EMC access.
  *
  * When attached to a block (typically near a Transmutation Table), this provider
- * allows Refined Storage to extract items using the nearest player's EMC.
+ * allows Refined Storage to see and extract items using the nearest player's EMC.
  *
  * Design approach:
  * - Finds nearest player within 16 blocks
  * - Uses that player's ProjectE knowledge and EMC balance
- * - Returns empty inventory for iteration (RS will query specific items)
- * - On extract: checks if player knows the item, calculates max quantity from EMC, transmutes
+ * - Lists ALL learned items in RS Grid with quantities based on available EMC
+ * - On extract: deducts EMC cost from player's balance
  * - On insert: rejected (EMC is read-only from RS perspective)
  *
- * This provides a simple, practical EMC integration without needing to list all known items.
+ * This provides full EMC integration - all learned items visible in RS Grid with
+ * real-time quantity calculation based on player's current EMC balance.
  */
 public class EMCExternalStorageProvider implements ExternalStorageProvider {
 
@@ -109,9 +110,47 @@ public class EMCExternalStorageProvider implements ExternalStorageProvider {
 
     @Override
     public Iterator<ResourceAmount> iterator() {
-        // Return empty iterator - RS will query specific items via extract()
-        // This is simpler than trying to list all learned items
-        return new ArrayList<ResourceAmount>().iterator();
+        List<ResourceAmount> resources = new ArrayList<>();
+
+        // Find nearest player
+        ServerPlayer player = findNearestPlayer();
+        if (player == null) {
+            return resources.iterator();
+        }
+
+        // Get player's knowledge
+        IKnowledgeProvider knowledge = getKnowledge(player);
+        if (knowledge == null) {
+            return resources.iterator();
+        }
+
+        // Get all learned items
+        for (ItemInfo itemInfo : knowledge.getKnowledge()) {
+            // Convert ItemInfo to ItemStack
+            ItemStack stack = itemInfo.createStack();
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            // Check if item has EMC value
+            if (!ProjectECompat.hasEMC(stack)) {
+                continue;
+            }
+
+            // Calculate max quantity based on player's EMC
+            long maxQuantity = calculateMaxQuantity(knowledge, stack);
+            if (maxQuantity <= 0) {
+                continue;
+            }
+
+            // Convert to RS ItemResource
+            ItemResource itemResource = ItemResource.ofItemStack(stack);
+
+            // Add to resource list with calculated quantity
+            resources.add(new ResourceAmount(itemResource, maxQuantity));
+        }
+
+        return resources.iterator();
     }
 
     @Override
