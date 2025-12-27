@@ -148,6 +148,7 @@ public class RecipeEMCCalculator {
 
     /**
      * Calculate EMC from smelting recipes (furnace, blast furnace, smoker)
+     * Uses generic Recipe handling to support modded recipe types
      */
     private double calculateFromSmeltingRecipes(ItemStack output) {
         // Check all smelting recipe types
@@ -158,7 +159,7 @@ public class RecipeEMCCalculator {
         };
 
         for (RecipeType<?> recipeType : smeltingTypes) {
-            double emcValue = calculateFromSmeltingType(output, (RecipeType<SmeltingRecipe>) recipeType);
+            double emcValue = calculateFromSmeltingType(output, recipeType);
             if (emcValue > 0.0) {
                 return emcValue;
             }
@@ -167,25 +168,41 @@ public class RecipeEMCCalculator {
         return 0.0;
     }
 
-    @SuppressWarnings("unchecked")
-    private double calculateFromSmeltingType(ItemStack output, RecipeType<SmeltingRecipe> recipeType) {
-        List<RecipeHolder<SmeltingRecipe>> recipes = (List<RecipeHolder<SmeltingRecipe>>) (List<?>)
-            recipeManager.getAllRecipesFor(recipeType);
+    /**
+     * Calculate EMC from a specific smelting recipe type
+     * Uses generic Recipe handling to support modded recipe types (like Malum's MetalNodeBlastingRecipe)
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private double calculateFromSmeltingType(ItemStack output, RecipeType<?> recipeType) {
+        // Get all recipes for this type (use raw type to handle wildcard properly)
+        List<RecipeHolder> recipes = recipeManager.getAllRecipesFor((RecipeType) recipeType);
 
-        for (RecipeHolder<SmeltingRecipe> recipeHolder : recipes) {
-            SmeltingRecipe recipe = recipeHolder.value();
-            ItemStack result = recipe.getResultItem(registryAccess);
+        for (RecipeHolder recipeHolder : recipes) {
+            try {
+                Recipe<?> recipe = recipeHolder.value();
+                ItemStack result = recipe.getResultItem(registryAccess);
 
-            if (ItemStack.isSameItemSameComponents(result, output)) {
-                double ingredientEMC = calculateIngredientEMC(recipe.getIngredients());
+                if (ItemStack.isSameItemSameComponents(result, output)) {
+                    // Check if recipe has ingredients (skip if not)
+                    List<Ingredient> ingredients = recipe.getIngredients();
+                    if (ingredients == null || ingredients.isEmpty()) {
+                        continue;
+                    }
 
-                if (ingredientEMC > 0.0) {
-                    int outputCount = result.getCount();
-                    double multiplier = Config.SMELTING_MULTIPLIER.get();
+                    double ingredientEMC = calculateIngredientEMC(ingredients);
 
-                    double emcPerItem = (ingredientEMC * multiplier) / outputCount;
-                    return emcPerItem;
+                    if (ingredientEMC > 0.0) {
+                        int outputCount = result.getCount();
+                        double multiplier = Config.SMELTING_MULTIPLIER.get();
+
+                        double emcPerItem = (ingredientEMC * multiplier) / outputCount;
+                        return emcPerItem;
+                    }
                 }
+            } catch (Exception e) {
+                // Log and skip recipes that cause exceptions (e.g., incompatible modded recipes)
+                CombinedPE.LOGGER.warn("Skipping recipe due to error: {}", e.getMessage());
+                continue;
             }
         }
 
