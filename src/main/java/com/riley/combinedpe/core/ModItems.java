@@ -196,9 +196,9 @@ public class ModItems {
             ModBlocks.ENHANCED_WORKBENCH.get(), new Item.Properties()
         ));
 
-    // EMC Linker block item
+    // EMC Linker block item (with helpful tooltips)
     public static final DeferredHolder<Item, net.minecraft.world.item.BlockItem> EMC_LINKER =
-        ITEMS.register("emc_linker", () -> new net.minecraft.world.item.BlockItem(
+        ITEMS.register("emc_linker", () -> new com.riley.combinedpe.integration.rs.ItemEMCLinker(
             ModBlocks.EMC_LINKER.get(), new Item.Properties()
         ));
 
