@@ -81,6 +81,10 @@ dependencies {
     // Will add when released for 1.21.1
 
     // JEI - Optional, will add later if needed
+
+    // JUnit 5 for unit testing
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
 }
 
 tasks.withType<ProcessResources> {
