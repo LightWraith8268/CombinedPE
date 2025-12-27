@@ -49,6 +49,9 @@ public class CombinedPE {
         // Initialize dynamic EMC system
         event.enqueueWork(() -> {
             com.riley.combinedpe.emc.DynamicEMCMapper.initialize();
+
+            // Initialize Refined Storage integration if available
+            com.riley.combinedpe.integration.rs.RefinedStorageIntegration.init();
         });
 
         LOGGER.info("CombinedPE common setup complete!");
